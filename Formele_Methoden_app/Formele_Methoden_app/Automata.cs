@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Formele_Methoden_app
 {
@@ -33,11 +30,11 @@ namespace Formele_Methoden_app
         /// Add transition to the set
         /// </summary>
         /// <param name="transition"></param>
-        public void addTransition(Transition<T> transition)
+        public void AddTransition(Transition<T> transition)
         {
             transitions.Add(transition);
-            states.Add(transition.GetFromState());
-            states.Add(transition.GetToState());
+            states.Add(transition.FromState);
+            states.Add(transition.ToState);
         }
 
         /// <summary>
@@ -54,7 +51,7 @@ namespace Formele_Methoden_app
         /// Add state to finalstates
         /// </summary>
         /// <param name="state">The state</param>
-        public void defineAsFinalState(T state)
+        public void DefineAsFinalState(T state)
         {
             states.Add(state);
             finalStates.Add(state);
@@ -79,10 +76,22 @@ namespace Formele_Methoden_app
             {
                 foreach (char symbol in symbols)
                 {
-                    dfa = dfa && getToStates(from, symbol).size() == 1;
+                    dfa = dfa && GetToStates(from, symbol).Count == 1;
                 }
             }
             return dfa;
+        }
+
+        /// <summary>
+        /// Dud method so that VS compiles.
+        /// TODO: Replace this as soon as humanly possible.
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        private List<char> GetToStates(T from, char symbol)
+        {
+            return new List<char>();
         }
     }
 }

@@ -2,11 +2,11 @@
 
 namespace Formele_Methoden_app
 {
-    class Transition<T> : IComparable<Transition<T>>
+    public class Transition<T> : IComparable<Transition<T>>
     {
         //TODO: Need to check the typing on these for further conflicts
-        public Transition<T> FromState { get; private set; }
-        public Transition<T> ToState { get; private set; }
+        public T FromState { get; private set; }
+        public T ToState { get; private set; }
         public char Identifier { get; private set; }
 
         private static char EPSILON = '$';
@@ -75,12 +75,12 @@ namespace Formele_Methoden_app
         /// Compares two <see cref="Transition{T}"/> objects.
         /// </summary>
         /// <param name="other">The <see cref="Transition{T}"/> to compare to.</param>
-        /// <returns></returns>
+        /// <returns>An integer indicator. TODO: Need to check this one with Paul</returns>
         public int CompareTo(Transition<T> other)
         {
-            int fromCompare = FromState.CompareTo(other.FromState);
+            int fromCompare = FromState.Equals(other.FromState) ? 1 : 0; 
             int idCompare = Identifier.CompareTo(other.Identifier);
-            int toCompare = ToState.CompareTo(other.ToState);
+            int toCompare = ToState.Equals(other.ToState) ? 1 : 0;
 
             //And now, for some magic
             return (fromCompare != 0 ? fromCompare : (idCompare != 0 ? idCompare : toCompare));
