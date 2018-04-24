@@ -29,11 +29,9 @@ namespace Formele_Methoden_app
         /// </summary>
         /// <param name="fromAndTo">Target and source for this transition</param>
         /// <param name="id">The identifier for this transition.</param>
-        public Transition(T fromAndTo, char id)
+        public Transition(T fromAndTo, char id) : this(fromAndTo, fromAndTo, id)
         {
-            FromState = fromAndTo;
-            ToState = fromAndTo;
-            Identifier = id;
+
         }
 
         /// <summary>
@@ -41,11 +39,9 @@ namespace Formele_Methoden_app
         /// </summary>
         /// <param name="from">From who the transition originates.</param>
         /// <param name="to">To who the transition goes.</param>
-        public Transition(T from, T to)
+        public Transition(T from, T to) : this(from, to, EPSILON)
         {
-            FromState = from;
-            ToState = to;
-            Identifier = EPSILON;
+
         }
 
         /// <summary>

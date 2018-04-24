@@ -11,6 +11,11 @@ namespace Formele_Methoden_app
         private ISet<T> finalStates;
         private ISet<char> symbols;
 
+        public Automata(char[] chars) : this(new HashSet<char>(chars))
+        {
+
+        }
+
         /// <summary>
         /// Constructor
         /// </summary>
