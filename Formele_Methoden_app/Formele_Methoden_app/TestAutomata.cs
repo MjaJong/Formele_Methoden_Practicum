@@ -28,8 +28,8 @@ namespace Formele_Methoden_app
             automata.DefineAsStartState("q0");
 
             // two final states:
-            automata.DefineAsStartState("q2");
-            automata.DefineAsStartState("q3");
+            automata.DefineAsFinalState("q2");
+            automata.DefineAsFinalState("q3");
 
             return automata;
         }
@@ -60,8 +60,8 @@ namespace Formele_Methoden_app
             automata.DefineAsStartState("A");
 
             // two final states:
-            automata.DefineAsStartState("C");
-            automata.DefineAsStartState("E");
+            automata.DefineAsFinalState("C");
+            automata.DefineAsFinalState("E");
 
             return automata;
         }

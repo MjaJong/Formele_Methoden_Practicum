@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Formele_Methoden_app
 {
     public class Automata<T> where T : IComparable
     {
-        private ISet<Transition<T>> transitions;
-        private ISet<T> states;
-        private ISet<T> startStates;
-        private ISet<T> finalStates;
-        private ISet<char> symbols;
+        private HashSet<Transition<T>> transitions;
+        private HashSet<T> states;
+        private HashSet<T> startStates;
+        private HashSet<T> finalStates;
+        private HashSet<char> symbols;
 
         public Automata(char[] chars) : this(new HashSet<char>(chars))
         {
@@ -84,19 +85,97 @@ namespace Formele_Methoden_app
                     dfa = dfa && GetToStates(from, symbol).Count == 1;
                 }
             }
+
             return dfa;
         }
 
         /// <summary>
-        /// Dud method so that VS compiles.
-        /// TODO: Replace this as soon as humanly possible.
+        /// Gets all to states that have the given from state and symbol.
         /// </summary>
-        /// <param name="from"></param>
-        /// <param name="symbol"></param>
-        /// <returns></returns>
-        private List<char> GetToStates(T from, char symbol)
+        /// <param name="from">The from state to check for.</param>
+        /// <param name="symbol">The symbol to check for.</param>
+        /// <returns>A list containing all to states.</returns>
+        private List<T> GetToStates(T from, char symbol)
         {
-            return new List<char>();
+           List<T> toStates =  new List<T>();
+
+            foreach(Transition<T> transition in transitions)
+            {
+                if(transition.FromState.Equals(from) && transition.Identifier.Equals(symbol)) { toStates.Add(transition.ToState); }
+            }
+
+            return toStates;
+        }
+
+        /// <summary>
+        /// Checks whether the given string fits within this automata
+        /// </summary>
+        /// <param name="stringToVerify">The string to check.</param>
+        /// <returns>A boolean indicator that is true if the string can be formed by this automata by traversing it's nodes.</returns>
+        public bool IsStringAcceptable(string stringToVerify)
+        {
+            bool stringIsAccepted = false;
+
+            //Pak start states + eerste element in char array
+            char charToCheckFor = stringToVerify[0];
+            HashSet<T> startingStates = startStates;
+
+            //Verwijder eerste character
+            if (stringToVerify.Count() > 1) { stringToVerify.Substring(1); }
+            else stringToVerify = "";
+
+            //Voor iedere uitgaande transitie check of het kan met het gegeven character
+            foreach (T state in startingStates)
+            {
+                if(finalStates.Contains(state) && stringToVerify.Count() == 0)
+                {
+                    stringIsAccepted = true;
+                    break;
+                }
+
+                IEnumerable<Transition<T>> validTransitions = transitions.Where(x => x.Identifier == charToCheckFor && x.FromState.Equals(state));
+                
+                foreach(Transition<T> transition in validTransitions)
+                {
+                    stringIsAccepted = CheckNext(transition.ToState, stringToVerify);
+                    if (stringIsAccepted) { break; }
+                }
+            }
+
+            //Als er een terug komt met true, dan bestaat de string
+            return stringIsAccepted;
+        }
+
+        /// <summary>
+        /// Recursively checks to see if we can form the string
+        /// </summary>
+        /// <param name="state">the state to check</param>
+        /// <param name="remainingString">the remainder of the string to check</param>
+        /// <returns>A boolean that is true if the string has been fully formed</returns>
+        private bool CheckNext(T state, string stringToVerify)
+        {
+            bool stringIsAccepted = false;
+
+            if (finalStates.Contains(state) && stringToVerify.Count() == 0) //Early escape if we're finished
+            {
+                stringIsAccepted =  true;
+                return stringIsAccepted;
+            } 
+
+            char currentCharacter = stringToVerify[0];
+
+            if (stringToVerify.Count() > 1) { stringToVerify.Substring(1); }
+            else stringToVerify = "";
+
+            IEnumerable<Transition<T>> validTransitions = transitions.Where(x => x.Identifier == currentCharacter && x.FromState.Equals(state));
+            
+            foreach(Transition<T> transition in validTransitions)
+            {
+                stringIsAccepted = CheckNext(transition.ToState, stringToVerify);
+                if (stringIsAccepted) { break; }
+            }
+
+            return stringIsAccepted;
         }
     }
 }
