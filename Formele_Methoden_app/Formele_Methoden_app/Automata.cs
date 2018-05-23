@@ -121,15 +121,15 @@ namespace Formele_Methoden_app
             HashSet<T> startingStates = startStates;
 
             //Verwijder eerste character
-            if (stringToVerify.Count() > 1) { stringToVerify.Substring(1); }
+            if (stringToVerify.Count() > 1) { stringToVerify = stringToVerify.Substring(1); }
             else stringToVerify = "";
 
             //Voor iedere uitgaande transitie check of het kan met het gegeven character
             foreach (T state in startingStates)
             {
-                if(finalStates.Contains(state) && stringToVerify.Count() == 0)
+                if(stringToVerify.Count() == 0)
                 {
-                    stringIsAccepted = true;
+                    stringIsAccepted = finalStates.Contains(state);
                     break;
                 }
 
@@ -137,7 +137,7 @@ namespace Formele_Methoden_app
                 
                 foreach(Transition<T> transition in validTransitions)
                 {
-                    stringIsAccepted = CheckNext(transition.ToState, stringToVerify);
+                    stringIsAccepted = CheckNextNode(transition.ToState, stringToVerify);
                     if (stringIsAccepted) { break; }
                 }
             }
@@ -152,26 +152,26 @@ namespace Formele_Methoden_app
         /// <param name="state">the state to check</param>
         /// <param name="remainingString">the remainder of the string to check</param>
         /// <returns>A boolean that is true if the string has been fully formed</returns>
-        private bool CheckNext(T state, string stringToVerify)
+        private bool CheckNextNode(T state, string stringToVerify)
         {
             bool stringIsAccepted = false;
 
-            if (finalStates.Contains(state) && stringToVerify.Count() == 0) //Early escape if we're finished
+            if (stringToVerify.Count() == 0) //Early escape if we're finished
             {
-                stringIsAccepted =  true;
+                stringIsAccepted = finalStates.Contains(state);
                 return stringIsAccepted;
             } 
 
             char currentCharacter = stringToVerify[0];
 
-            if (stringToVerify.Count() > 1) { stringToVerify.Substring(1); }
+            if (stringToVerify.Count() > 1) { stringToVerify = stringToVerify.Substring(1); }
             else stringToVerify = "";
 
             IEnumerable<Transition<T>> validTransitions = transitions.Where(x => x.Identifier == currentCharacter && x.FromState.Equals(state));
             
             foreach(Transition<T> transition in validTransitions)
             {
-                stringIsAccepted = CheckNext(transition.ToState, stringToVerify);
+                stringIsAccepted = CheckNextNode(transition.ToState, stringToVerify);
                 if (stringIsAccepted) { break; }
             }
 
