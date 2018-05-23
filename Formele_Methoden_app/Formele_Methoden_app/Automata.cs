@@ -177,5 +177,60 @@ namespace Formele_Methoden_app
 
             return stringIsAccepted;
         }
+
+        /// <summary>
+        /// Gets the minimum length of a language with this automaton.
+        /// </summary>
+        /// <returns>A integer that is equal to the mimimum length of the language.</returns>
+        private int GetMinimumLanguageLength()
+        {
+            int length = 0;
+
+            foreach(T state in startStates)
+            {
+                int returnedValue = CountNextState(length, state);
+
+                if(returnedValue == 0) { continue; }
+
+                if (length == 0) { length = returnedValue; }
+                else if (length > returnedValue) { length = returnedValue; }
+            }
+
+            return length;
+        }
+
+        /// <summary>
+        /// Recursively loop through the automaton
+        /// </summary>
+        /// <returns>An int that is the total count found while looping</returns>
+        private int CountNextState(int previousCount, T state)
+        {
+            int newCount = previousCount + 1;
+
+            if (finalStates.Contains(state))
+            {
+                return newCount;
+            }
+            else
+            {
+                IEnumerable<Transition<T>> transitionsForThisState = transitions.Where(x => x.FromState.Equals(state) && !x.FromState.Equals(x.ToState));
+
+                if(transitionsForThisState.ToArray().Count() == 0) { return 0; }
+
+                int nextCount = 0;
+
+                foreach(Transition<T> transition in transitionsForThisState)
+                {
+                   int returnedValue = CountNextState(newCount, transition.ToState);
+
+                   if (returnedValue == 0) { continue; }
+
+                   if (nextCount == 0) { nextCount = returnedValue; }
+                   else if(nextCount > returnedValue) { nextCount = returnedValue; }
+                }
+
+                return nextCount;
+            }
+        }
     }
 }
