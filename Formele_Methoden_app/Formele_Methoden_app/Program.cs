@@ -17,6 +17,11 @@ namespace Formele_Methoden_app
             Console.WriteLine("-----------------------------------------\n");
             auto2.PrintTransitions();
             Console.WriteLine("-----------------------------------------\n");
+
+            RegExpTest ret = new RegExpTest();
+            ret.testLanguage();
+            Console.WriteLine("-----------------------------------------\n");
+            Console.Read();
         }
     }
 }
