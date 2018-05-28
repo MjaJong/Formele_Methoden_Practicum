@@ -37,7 +37,11 @@ namespace Formele_Methoden_app
             string result = "";
 
             foreach (string symbol in set)
+            {
                 result += symbol;
+                result += "; \n";
+            }
+
 
             return result;
         }
@@ -95,7 +99,6 @@ namespace Formele_Methoden_app
                     Console.WriteLine("getLanguage is nog niet gedefinieerd voor de operator: " + op);
                     break;
             }
-
             return languageResult;
         }
 
