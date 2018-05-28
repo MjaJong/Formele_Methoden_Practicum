@@ -28,6 +28,7 @@ namespace Formele_Methoden_app
             Console.WriteLine("String {0} is a {1} string for Auto1.", INVALID_STRING_1, auto1.IsStringAcceptable(INVALID_STRING_1) ? "valid" : "invalid");
             Console.WriteLine("String {0} is a {1} string for Auto1.", INVALID_STRING_2, auto1.IsStringAcceptable(INVALID_STRING_2) ? "valid" : "invalid");
             Console.WriteLine("String {0} is a {1} string for Auto1.", INVALID_STRING_3, auto1.IsStringAcceptable(INVALID_STRING_3) ? "valid" : "invalid");
+            Console.WriteLine("Generate a string of length 3. Resulting string = " + auto1.GenerateLanguageOfGivenLength(3));
             Console.WriteLine("-----------------------------------------");
             auto2.PrintTransitions();
             Console.WriteLine("Auto2 is dfa? " + auto2.IsDfa());

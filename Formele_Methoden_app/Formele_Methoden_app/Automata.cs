@@ -179,6 +179,62 @@ namespace Formele_Methoden_app
         }
 
         /// <summary>
+        /// Generates a language with the given length. Language might be a tad suspciously the same everytime due to the exclusion of rng
+        /// </summary>
+        /// <param name="length">The length of the string to generate</param>
+        /// <returns>An error string if the string can't be generated and a word if there is a valid word with the given value</returns>
+        public string GenerateLanguageOfGivenLength(int length)
+        {
+            string initialString = "";
+            string errorString = "Problem encountered so no valid language could be generated.";
+
+            if(length < GetMinimumLanguageLength()) { return errorString; } //Early return for when the given length is shorter than the lenght of the shortest word
+
+            Random rng = new Random();
+            T startState = startStates.ElementAt(rng.Next(0, (startStates.Count - 1))); //Substracting one to prevent out of bounds errors
+            string result = AddLetterToLanguage(length, initialString, startState);
+
+            result = String.IsNullOrEmpty(result) ? errorString : result;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Adds a letter to a language, then returns the string
+        /// </summary>
+        /// <param name="remainingLength">The remaining length for the string</param>
+        /// <param name="stringSoFar">The string generated so far.</param>
+        /// <param name="state">The state from which to generate a letter.</param>
+        /// <returns>Either returns a valid string, or an empty string if there is a non valid string.</returns>
+        private string AddLetterToLanguage(int remainingLength, string stringSoFar, T state)
+        {
+            string resultingString = string.Empty;
+
+            if(remainingLength > 0)
+            {
+                remainingLength = remainingLength - 1;
+
+                IEnumerable<Transition<T>> validTransitions = transitions.Where(x => x.FromState.Equals(state));
+
+                foreach (Transition<T> transition in validTransitions)
+                {
+                    string newString = string.Concat(stringSoFar, transition.Identifier);
+
+                    resultingString = AddLetterToLanguage(remainingLength, newString, transition.ToState);
+
+                    if (string.IsNullOrEmpty(resultingString)) { continue; }
+                    else { break; }
+                }
+            }
+            else
+            {
+                resultingString = finalStates.Contains(state) ? stringSoFar : string.Empty;
+            }
+
+            return resultingString;
+        }
+
+        /// <summary>
         /// Gets the minimum length of a language with this automaton.
         /// </summary>
         /// <returns>A integer that is equal to the mimimum length of the language.</returns>
