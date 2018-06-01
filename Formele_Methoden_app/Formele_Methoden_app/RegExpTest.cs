@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Formele_Methoden_app
 {
@@ -33,6 +29,8 @@ namespace Formele_Methoden_app
 
         public void testLanguage()
         {
+            Console.Write("expr4 = " + expr4.ToString());
+
             Console.WriteLine("taal van (baa):\n" + expr1.GetLanguageString(5));
             Console.WriteLine("taal van (bb):\n" + expr2.GetLanguageString(5));
             Console.WriteLine("taal van (baa | bb):\n" + expr3.GetLanguageString(5));

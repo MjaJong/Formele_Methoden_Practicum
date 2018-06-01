@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Formele_Methoden_app
 {
@@ -34,9 +30,9 @@ namespace Formele_Methoden_app
             Console.WriteLine("Auto2 is dfa? " + auto2.IsDfa());
             Console.WriteLine("-----------------------------------------\n");
 
-            RegExpTest ret = new RegExpTest();
-            ret.testLanguage();
-            Console.WriteLine("-----------------------------------------\n");
+            //RegExpTest ret = new RegExpTest();
+            //ret.testLanguage();
+            //Console.WriteLine("-----------------------------------------\n");
             Console.Read();
         }
     }

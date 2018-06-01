@@ -48,6 +48,7 @@
     <Compile Include="RegEx.cs" />
     <Compile Include="RegExpTest.cs" />
     <Compile Include="TestAutomata.cs" />
+    <Compile Include="ThompsonConstructie.cs" />
     <Compile Include="Transition.cs" />
   </ItemGroup>
   <ItemGroup>
