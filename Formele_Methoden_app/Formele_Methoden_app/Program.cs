@@ -30,9 +30,10 @@ namespace Formele_Methoden_app
             Console.WriteLine("Auto2 is dfa? " + auto2.IsDfa());
             Console.WriteLine("-----------------------------------------\n");
 
-            //RegExpTest ret = new RegExpTest();
+            RegExpTest ret = new RegExpTest();
             //ret.testLanguage();
-            //Console.WriteLine("-----------------------------------------\n");
+            ret.testToString();
+            Console.WriteLine("-----------------------------------------\n");
             Console.Read();
         }
     }

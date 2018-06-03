@@ -29,8 +29,6 @@ namespace Formele_Methoden_app
 
         public void testLanguage()
         {
-            Console.Write("expr4 = " + expr4.ToString());
-
             Console.WriteLine("taal van (baa):\n" + expr1.GetLanguageString(5));
             Console.WriteLine("taal van (bb):\n" + expr2.GetLanguageString(5));
             Console.WriteLine("taal van (baa | bb):\n" + expr3.GetLanguageString(5));
@@ -38,6 +36,16 @@ namespace Formele_Methoden_app
             Console.WriteLine("taal van (a|b)*:\n" + all.GetLanguageString(5));
             Console.WriteLine("taal van (baa | bb)+:\n" + expr4.GetLanguageString(5));
             Console.WriteLine("taal van (baa | bb)+ (a|b)*:\n" + expr5.GetLanguageString(6));
+        }
+
+        public void testToString()
+        {
+            Console.WriteLine(expr1.ToString());
+            Console.WriteLine(expr2.ToString());
+            Console.WriteLine(expr3.ToString());
+            Console.WriteLine(all.ToString());
+            Console.WriteLine(expr4.ToString());
+            Console.WriteLine(expr5.ToString());
         }
     }
 }

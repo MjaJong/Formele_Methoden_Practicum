@@ -168,8 +168,11 @@ namespace Formele_Methoden_app
         /// <returns></returns>
         public override string ToString()
         {
-            string leftPart = TraverseLeft(left);
-            string rightPart = TraverseRight(right);
+            string leftPart = "";
+            string rightPart = "";
+
+            if (left != null) { leftPart = TraverseLeft(left); }
+            if (right != null) { rightPart = TraverseRight(right); }
 
             char operatorAsChar = EnumToChar(op);
 
@@ -177,8 +180,18 @@ namespace Formele_Methoden_app
             string completeString = terminals;
 
             if (operatorAsChar != '$') { completeString = completeString + operatorAsChar; }
-            if (leftPart != string.Empty) { completeString = leftPart + completeString; }
-            if (rightPart != string.Empty) { completeString = completeString + rightPart; }
+
+            if (leftPart != string.Empty)
+            {
+                if (operatorAsChar == '*' || operatorAsChar == '+') { completeString = "(" + leftPart + ")" + completeString; }
+                else { completeString = leftPart + completeString; }
+            }
+            if (rightPart != string.Empty)
+            {
+                if (operatorAsChar == '*' || operatorAsChar == '+') { completeString =  completeString + "(" + rightPart + ")"; }
+                else { completeString = completeString + rightPart; }
+            }
+                
 
             return completeString;
         }
@@ -190,13 +203,30 @@ namespace Formele_Methoden_app
         /// <returns>Returns the final string of everyting left of the original.</returns>
         private string TraverseLeft(RegExp left)
         {
-            string leftString = terminals;
-            if(left.op != Operator.ONE) { leftString = leftString + EnumToChar(left.op); }
-            if(left.LeftRegExp != null)
+            string leftPart = "";
+            string rightPart = "";
+            char operatorAsChar = '$';
+
+            if (left.LeftRegExp != null) { leftPart = TraverseLeft(left.LeftRegExp); }
+            if (left.op != Operator.ONE) { operatorAsChar =  EnumToChar(left.op); }
+            if (left.RightRegExp != null) { rightPart = TraverseRight(left.RightRegExp); }
+
+            string leftString = left.terminals;
+
+            if (operatorAsChar != '$') { leftString = leftString + operatorAsChar; }
+
+            if (leftPart != string.Empty)
             {
-                string evenMoreLeft = TraverseLeft(left.LeftRegExp);
-                leftString = evenMoreLeft + leftString;
+                if (operatorAsChar == '*' || operatorAsChar == '+') { leftString = "(" + leftPart + ")" + leftString; }
+                else { leftString = leftPart + leftString; }
             }
+
+            if (rightPart != string.Empty)
+            {
+                if (operatorAsChar == '*' || operatorAsChar == '+') { leftString = leftString + "(" + rightPart + ")"; }
+                else { leftString = leftString + rightPart; }
+            }
+
             return leftString;
         }
 
@@ -207,13 +237,30 @@ namespace Formele_Methoden_app
         /// <returns>Returns the final string of everyting right of the original.</returns>
         private string TraverseRight(RegExp right)
         {
-            string rightString = terminals;
-            if (right.op != Operator.ONE) { rightString = rightString + EnumToChar(left.op); }
-            if (right.RightRegExp != null)
+            string leftPart = "";
+            string rightPart = "";
+            char operatorAsChar = '$';
+
+            if (right.LeftRegExp != null) { leftPart = TraverseLeft(right.LeftRegExp); }
+            if (right.op != Operator.ONE) { operatorAsChar = EnumToChar(right.op); }
+            if (right.RightRegExp != null) { rightPart = TraverseRight(right.RightRegExp); }
+
+            string rightString = right.terminals;
+
+            if (operatorAsChar != '$') { rightString = rightString + operatorAsChar; }
+
+            if (leftPart != string.Empty)
             {
-                string evenMoreLeft = TraverseLeft(right.RightRegExp);
-                rightString = evenMoreLeft + rightString;
+                if (operatorAsChar == '*' || operatorAsChar == '+') { rightString = "(" + leftPart + ")" + rightString; }
+                else { rightString = leftPart + rightString; }
             }
+
+            if (rightPart != string.Empty)
+            {
+                if (operatorAsChar == '*' || operatorAsChar == '+') { rightString = rightString + "(" + rightPart + ")"; }
+                else { rightString = rightString + rightPart; }
+            }
+
             return rightString;
         }
 
