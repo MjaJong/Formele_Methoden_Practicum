@@ -9,13 +9,13 @@ namespace Formele_Methoden_app
     /// </summary>
     public class ThompsonConstruction
     {
-        struct ThompsonPart
+        private class ThompsonPart
         {
-            public HashSet<Transition<string>> transitions;
-            public HashSet<string> states;
+            public HashSet<Transition<string>> transitions = new HashSet<Transition<string>>();
+            public HashSet<string> states = new HashSet<string>();
 
-            public string startState;
-            public string finalState;
+            public string startState = string.Empty;
+            public string finalState = string.Empty;
         }
 
         public ThompsonConstruction()
@@ -59,50 +59,61 @@ namespace Formele_Methoden_app
 
             ThompsonPart generatedPart = new ThompsonPart();
 
-            int bracketCount = 0;
-            int openingBracketPosition = -1;
-            int closingBracketPosition = -1;
-            char regexOperator = '$';
+            bool regexHasBrackets = false;
+            int bracketBalance = 0; //Checks to see if we're in balance in the brackets, thus passing enough brackets to actually close.
+            bool foundEnclosedSubstring = false;
 
-            foreach(Char c in regexAsString) { if (c == '(' || c == ')') bracketCount++; } //Count all brackets, important for later.
+            char regexOperator = '$';
+            int operatorPosition = -1;
 
             //Iterate over string, check for brackets
             for (int i = 0; i < regexAsString.Length; i++)
             {
                 //Special character checks
-                if (regexAsString[i] == '(' && openingBracketPosition == -1) { openingBracketPosition = i; }
-                if (regexAsString[i] == ')' && closingBracketPosition == -1) { closingBracketPosition = i; }
-                if (regexAsString[i] == '.' && regexOperator == '$') { regexOperator = '.'; }
-                if (regexAsString[i] == '|' && regexOperator == '$') { regexOperator = '|'; }
-                if (regexAsString[i] == '+' && regexOperator == '$') { regexOperator = '+'; }
-                if (regexAsString[i] == '*' && regexOperator == '$') { regexOperator = '*'; }
+                //Check to see if we have an enclosed section which will be important
+                if (regexAsString[i] == '(')
+                {
+                    foundEnclosedSubstring = true;
+                    regexHasBrackets = true;
+                    bracketBalance++;
+                }
+                if (regexAsString[i] == ')')
+                {
+                    bracketBalance--;
+                    if (bracketBalance == 0) foundEnclosedSubstring = false;
+                }
 
-                if(bracketCount != 0) //Thus we have brackets in our regex
+                //And save the special operator
+                if (regexAsString[i] == '.' && regexOperator == '$') { regexOperator = '.'; operatorPosition = i; } //Yes I know two statements as a one liner. Couldn't be bothered to take up the extra space.
+                if (regexAsString[i] == '|' && regexOperator == '$') { regexOperator = '|'; operatorPosition = i; }
+                if (regexAsString[i] == '+' && regexOperator == '$') { regexOperator = '+'; operatorPosition = i; }
+                if (regexAsString[i] == '*' && regexOperator == '$') { regexOperator = '*'; operatorPosition = i; }
+
+
+                if(regexHasBrackets) //Thus we have brackets in our regex
                 {
                     //Check to see if we should break, or that we should continue (should one of the operators be contained within brackets)
-                    if (regexOperator != '$' && (openingBracketPosition == -1 || closingBracketPosition == -1))//This means that we have a contained operator
+                    if (regexOperator != '$' && foundEnclosedSubstring)//This means that we have a contained operator
                     {
                         regexOperator = '$';
+                        operatorPosition = -1;
                     }
-                    else
+                    else if(regexOperator != '$') //Translates the operator that has been found
                     {
-                        generatedPart = TranslateOperator(openingBracketPosition, closingBracketPosition, regexAsString, regexOperator);
-                    } //Translates the operator that has been found
+                        generatedPart = TranslateOperator(regexAsString, regexOperator, operatorPosition, regexHasBrackets);
+                    }
                 }
-                else
+                else if(i == regexAsString.Length - 1)//When that last character has been passed, dive into this part
                 {
-                    //Translates the operator that has been found, with opening and closing positions being -1
+                    //Translates the operator that has been found when there are no more brackets
                     if (regexOperator != '$')
                     {
-                        //TODO split string according (take aa*b as example) with the Translate operator transition
+                        generatedPart = TranslateOperator(regexAsString, regexOperator, operatorPosition, regexHasBrackets);
                     }
                     //We've found no brackets and operators, thus we can turn the characters into transitions
                     else
                     {
-                        foreach(Char c in regexAsString)
-                        {
-                            generatedPart =  GenerateMultipleSymbolTransition(regexAsString);
-                        }
+                        generatedPart = GenerateMultipleSymbolTransition(regexAsString);
                     } 
                 }
             }
@@ -130,22 +141,28 @@ namespace Formele_Methoden_app
         /// <summary>
         /// Translates a operator to a thompson part.
         /// </summary>
-        /// <param name="openingBracketPosition">Position of the opening bracket.</param>
-        /// <param name="closingBracketPosition">Position of the closing bracket.</param>
         /// <param name="regex">The regex to translate.</param>
         /// <param name="regexOperator">The operator found</param>
+        /// <param name="operatorPosition">Position of the operator to translate. Used to some substring stuff.</param>
         /// <returns>A <see cref="ThompsonPart"/> that contains all data.</returns>
-        private ThompsonPart TranslateOperator(int openingBracketPosition, int closingBracketPosition, string regex, char regexOperator)
+        private ThompsonPart TranslateOperator(string regex, char regexOperator, int operatorPosition, bool regexHasBrackets)
         {
-            //Build in check to translate character without brackets
-            //Found special substring, create a fitting thompson part. String between brackets is left, everthing else is right
-            int leftLength = (closingBracketPosition) - (openingBracketPosition + 1);
-            string leftExpression = regex.Substring(openingBracketPosition + 1, leftLength);
-            string rightExpression = regex.Substring(closingBracketPosition + 1);
+            //Build in check to translate character without brackets TODO: check for -1 in either position, if so assume there are no more brackets
+            string leftExpression = "";
+            string rightExpression = "";
+
+            leftExpression = regex.Substring(0, operatorPosition); //Also doubles as the whole regex minus the operator
+            if(operatorPosition + 1 < regex.Length) { rightExpression = regex.Substring(operatorPosition + 1, (regex.Length - leftExpression.Length - 1)); }
+
+           if(regexHasBrackets)
+            {
+                leftExpression = StripRegexOfOuterBrackets(leftExpression);
+                if (rightExpression != "") { rightExpression = StripRegexOfOuterBrackets(rightExpression); }
+            }
 
             ThompsonPart generatedPart = new ThompsonPart();
 
-            //And generate something for the operator. Note that the first to split the string, while the second two do not, so the second two take the whole string
+            //And generate something for the operator. Note that the first two split the string, while the second two do not, so the second two take the whole string
             switch (regexOperator)
             {
                 case '.':
@@ -155,10 +172,10 @@ namespace Formele_Methoden_app
                     generatedPart = GenerateOrOperatorConstruction(leftExpression, rightExpression);
                     break;
                 case '+':
-                    generatedPart = GeneratePlusOperatorConstruction(regex);
+                    generatedPart = GeneratePlusOperatorConstruction(leftExpression);
                     break;
                 case '*':
-                    generatedPart = GenerateAsterixOperatorConstruction(regex);
+                    generatedPart = GenerateAsterixOperatorConstruction(leftExpression);
                     break;
             }
 
@@ -176,7 +193,7 @@ namespace Formele_Methoden_app
 
             foreach(char c in symbols)
             {
-                if(generatedPart.states.DefaultIfEmpty() == null)
+                if(generatedPart.states.Count <= 0)
                 {
                     generatedPart = GenerateSingleSymbolTransition(c);
                 }
@@ -184,12 +201,24 @@ namespace Formele_Methoden_app
                 {
                     ThompsonPart extraPart = GenerateSingleSymbolTransition(c);
 
-                    generatedPart.states.Concat(extraPart.states);
-                    generatedPart.transitions.Concat(extraPart.transitions);
-                    generatedPart.finalState = extraPart.finalState;
+                    Dictionary<string, string> remappedStates = new Dictionary<string, string>();
+                    int stateIndex = generatedPart.states.Count - 1;
+
+                    foreach(string state in extraPart.states)
+                    {
+                        remappedStates.Add(state, "q" + stateIndex);
+                        stateIndex++;
+                        generatedPart.states.Add(remappedStates[state]);
+                    }
+
+                    foreach(Transition<string> transition in extraPart.transitions)
+                    {
+                        generatedPart.transitions.Add(new Transition<string>(remappedStates[transition.FromState], remappedStates[transition.ToState], transition.Identifier));
+                    }
+
+                    generatedPart.finalState = remappedStates[extraPart.finalState];
                 }
             }
-
             return generatedPart;
         }
 
@@ -220,7 +249,7 @@ namespace Formele_Methoden_app
         /// <param name="leftSubstring">The substring that should be between state q0 and q1.</param>
         /// <param name="rightSubstring">The substring that should be between state q2 and q3.</param>
         /// <returns>A <see cref="ThompsonPart"/> that has all states and transitions.</returns>
-        private ThompsonPart GenerateDotOperatorConstruction(string leftSubstring, string rightSubstring)
+        private ThompsonPart GenerateDotOperatorConstruction(string leftSubstring, string rightSubstring)//Works
         {
             ThompsonPart newPart = new ThompsonPart();
             ThompsonPart leftPart = GenerateThompsonPart(leftSubstring);
@@ -229,38 +258,55 @@ namespace Formele_Methoden_app
             #region State consolidation
             //Consolidate states here so that all states are unique (this is not useable by multiple constructions, since those differ in contained elements
             int leftStatesCount = leftPart.states.Count;
-            int leftStatesCountMinusOne = leftStatesCount - 1;
             int rightStatesCount = rightPart.states.Count;
-            int rightStatesCountMinusOne = rightStatesCount - 1;
 
-            leftPart.startState = "q0";                                                                                                 //Left part start state = q0
-            leftPart.finalState = "q" + leftStatesCountMinusOne;                                                                        //Left part final state = all left states count - 1
-            leftPart.states = new HashSet<string> { leftPart.startState, leftPart.finalState};
-            for (int i = 1; i < leftStatesCountMinusOne; i++) { leftPart.states.Add("q" + i); }                                         //States in between: for(int i = 1, i < count - 1, i++)
+            Dictionary<string, string> remappedStates = new Dictionary<string, string>();
+            int stateIndex = 0;
 
-            if(leftPart.states.Count != leftStatesCount) { throw new Exception("Mismatch in list sizes of left part"); }
+            foreach (string state in leftPart.states)
+            {
+                remappedStates.Add(state, "q" + stateIndex);
+                stateIndex++;
+                newPart.states.Add(remappedStates[state]);
+            }
 
-            rightPart.startState = "q" + leftStatesCount;                                                                               //Right part start state = all left states count
-            rightPart.finalState = "q" + (leftStatesCount + rightStatesCountMinusOne);                                                  //Right part final state = left state count + all right states count - Read also as 6 elements + 6 elements to get the last position, which zero indexed is 11
-            rightPart.states = new HashSet<string> { rightPart.startState, rightPart.finalState };
-            for (int i = 1 + leftStatesCount; i < (rightStatesCountMinusOne + leftStatesCount); i++) { rightPart.states.Add("q" + i); } //States in between: for(int i = 1, i < count - 1, i++)
+            leftPart.startState = remappedStates[leftPart.startState];
+            leftPart.finalState = remappedStates[leftPart.finalState];
+
+            foreach (Transition<string> transition in leftPart.transitions)
+            {
+                newPart.transitions.Add(new Transition<string>(remappedStates[transition.FromState], remappedStates[transition.ToState], transition.Identifier));
+            }
+
+            if (leftPart.states.Count != leftStatesCount) { throw new Exception("Mismatch in list sizes of left part"); }
+
+            remappedStates.Clear();
+
+            foreach (string state in rightPart.states)
+            {
+                remappedStates.Add(state, "q" + stateIndex);
+                stateIndex++;
+                newPart.states.Add(remappedStates[state]);
+            }
+
+            rightPart.startState = remappedStates[rightPart.startState];
+            rightPart.finalState = remappedStates[rightPart.finalState];
+
+            foreach (Transition<string> transition in rightPart.transitions)
+            {
+                newPart.transitions.Add(new Transition<string>(remappedStates[transition.FromState], remappedStates[transition.ToState], transition.Identifier));
+            }
 
             if (rightPart.states.Count != rightStatesCount) { throw new Exception("Mismatch in list sizes of right part"); }
             #endregion
 
             //After consolidation, use data to set values
-            Transition<string> transition = new Transition<string>(leftPart.finalState, rightPart.startState);                          //Epsilon transition between the two parts.
+            Transition<string> epsilonTransition = new Transition<string>(leftPart.finalState, rightPart.startState);                          //Epsilon transition between the two parts.
 
-            newPart.transitions.Add(transition);
-            IEnumerable<Transition<string>> containedTransitions = leftPart.transitions.Concat(rightPart.transitions);
-            IEnumerable<Transition<string>> allTransistions =  newPart.transitions.Concat(containedTransitions);
-            newPart.transitions = new HashSet<Transition<string>>(allTransistions);
+            newPart.transitions.Add(epsilonTransition);
 
             newPart.startState = leftPart.startState;
             newPart.finalState = rightPart.finalState;
-
-            IEnumerable<string> containedStates = leftPart.states.Concat(rightPart.states);
-            newPart.states = new HashSet<string>(containedStates); 
 
             return newPart;
         }
@@ -271,29 +317,53 @@ namespace Formele_Methoden_app
         /// <param name="leftSubstring">The substring that should be between state q2 and q3.</param>
         /// <param name="rightSubstring">The substring that should be between state q4 and q5.</param>
         /// <returns>A <see cref="ThompsonPart"/> that has all states and transitions.</returns>
-        private ThompsonPart GenerateOrOperatorConstruction(string leftSubstring, string rightSubstring)
+        private ThompsonPart GenerateOrOperatorConstruction(string leftSubstring, string rightSubstring)//Works
         {
             ThompsonPart newPart = new ThompsonPart();
             ThompsonPart leftPart = GenerateThompsonPart(leftSubstring);
             ThompsonPart rightPart = GenerateThompsonPart(rightSubstring);
 
             #region State consolidation
-            //Consolidate states here so that all states are unique (this is not useable by multiple constructions, since those differ in contained elements
+            //Consolidate states here so that all states are unique (this is not useable by multiple constructions, since those differ in contained elements. now also handles states
             int leftStatesCount = leftPart.states.Count;
-            int leftStatesCountPlusOne = leftStatesCount + 1;
             int rightStatesCount = rightPart.states.Count;
 
-            leftPart.startState = "q2";                                                                                                         //Left part start state = q2, q0 is our start state for the or and q1 the end state
-            leftPart.finalState = "q" + leftStatesCountPlusOne;                                                                                 //Left part final state = all left states count, due to being shifted one over
-            leftPart.states = new HashSet<string> { leftPart.startState, leftPart.finalState };
-            for (int i = 2; i < leftStatesCountPlusOne; i++) { leftPart.states.Add("q" + i); }                                                  //States in between: for(int i = 1, i < count - 1, i++)
+            Dictionary<string, string> remappedStates = new Dictionary<string, string>();
+            int stateIndex = 2;
+
+            foreach (string state in leftPart.states)
+            {
+                remappedStates.Add(state, "q" + stateIndex);
+                stateIndex++;
+                newPart.states.Add(remappedStates[state]);
+            }
+
+            leftPart.startState = remappedStates[leftPart.startState];
+            leftPart.finalState = remappedStates[leftPart.finalState];
+
+            foreach (Transition<string> transition in leftPart.transitions)
+            {
+                newPart.transitions.Add(new Transition<string>(remappedStates[transition.FromState], remappedStates[transition.ToState], transition.Identifier));
+            }
 
             if (leftPart.states.Count != leftStatesCount) { throw new Exception("Mismatch in list sizes of left part"); }
 
-            rightPart.startState = "q" + (leftStatesCountPlusOne + 1);                                                                          //Right part start state = all left states count
-            rightPart.finalState = "q" + (leftStatesCountPlusOne + rightStatesCount);                                                           //Right part final state =  all right states count - 1
-            rightPart.states = new HashSet<string> { rightPart.startState, rightPart.finalState };
-            for (int i = (leftStatesCountPlusOne + 2); i < (leftStatesCountPlusOne + rightStatesCount); i++) { rightPart.states.Add("q" + i); } //States in between: for(int i = 1, i < count - 1, i++)
+            remappedStates.Clear();
+
+            foreach (string state in rightPart.states)
+            {
+                remappedStates.Add(state, "q" + stateIndex);
+                stateIndex++;
+                newPart.states.Add(remappedStates[state]);
+            }
+
+            rightPart.startState = remappedStates[rightPart.startState];
+            rightPart.finalState = remappedStates[rightPart.finalState];
+
+            foreach (Transition<string> transition in rightPart.transitions)
+            {
+                newPart.transitions.Add(new Transition<string>(remappedStates[transition.FromState], remappedStates[transition.ToState], transition.Identifier));
+            }
 
             if (rightPart.states.Count != rightStatesCount) { throw new Exception("Mismatch in list sizes of right part"); }
             #endregion
@@ -302,13 +372,11 @@ namespace Formele_Methoden_app
             newPart.startState = "q0";
             newPart.finalState = "q1";
 
-            newPart.states = new HashSet<string> { newPart.startState, newPart.finalState };
-
-            IEnumerable<string> containedStates = leftPart.states.Concat(rightPart.states);
-            newPart.states.Concat(containedStates);
+            string[] newStates = { newPart.startState, newPart.finalState };
+            foreach(string state in newStates) { newPart.states.Add(state); }
 
             //Followed by the transitions
-            newPart.transitions = new HashSet<Transition<string>>
+            Transition<string>[] newTransitions= 
             {
                 new Transition<string>("q0", leftPart.startState),
                 new Transition<string>("q0", rightPart.startState),
@@ -316,9 +384,7 @@ namespace Formele_Methoden_app
                 new Transition<string>(rightPart.finalState, "q1")
             };
 
-            IEnumerable<Transition<string>> containedTransitions = leftPart.transitions.Concat(rightPart.transitions);
-            IEnumerable<Transition<string>> allTransitions = newPart.transitions.Concat(containedTransitions);
-            newPart.transitions = new HashSet<Transition<string>>(allTransitions);
+            foreach (Transition<string> transition in newTransitions) { newPart.transitions.Add(transition); }
 
             return newPart;
         }
@@ -328,7 +394,7 @@ namespace Formele_Methoden_app
         /// </summary>
         /// <param name="subString">The new part of the Regex to contain within this part.</param>
         /// <returns>A <see cref="ThompsonPart"/> that has all states and transitions.</returns>
-        private ThompsonPart GeneratePlusOperatorConstruction(string subString)
+        private ThompsonPart GeneratePlusOperatorConstruction(string subString)//Works
         {
             ThompsonPart newPart = new ThompsonPart();
             ThompsonPart containedPart = GenerateThompsonPart(subString);
@@ -336,12 +402,23 @@ namespace Formele_Methoden_app
             #region State consolidation
             //Consolidate states here so that all states are unique (this is not useable by multiple constructions, since those differ in contained elements
             int containedStatesCount = containedPart.states.Count;
-            int leftStatesCountPlusOne = containedStatesCount + 1;
+            Dictionary<string, string> remappedStates = new Dictionary<string, string>();
+            int stateIndex = 2;
 
-            containedPart.startState = "q2";                                                                    //Contained part start state = q2, q0 is our start state for the or and q1 the end state
-            containedPart.finalState = "q" + leftStatesCountPlusOne;                                            //Contained part final state = all contained states count, due to being shifted one over
-            containedPart.states = new HashSet<string> { containedPart.startState, containedPart.finalState };
-            for (int i = 2; i < leftStatesCountPlusOne; i++) { containedPart.states.Add("q" + i); }             //States in between: for(int i = 1, i < count - 1, i++)
+            foreach (string state in containedPart.states)
+            {
+                remappedStates.Add(state, "q" + stateIndex);
+                stateIndex++;
+                newPart.states.Add(remappedStates[state]);
+            }
+
+            containedPart.startState = remappedStates[containedPart.startState];
+            containedPart.finalState = remappedStates[containedPart.finalState];
+
+            foreach (Transition<string> transition in containedPart.transitions)
+            {
+                newPart.transitions.Add(new Transition<string>(remappedStates[transition.FromState], remappedStates[transition.ToState], transition.Identifier));
+            }
 
             if (containedPart.states.Count != containedStatesCount) { throw new Exception("Mismatch in list sizes of left part"); }
             #endregion
@@ -350,20 +427,18 @@ namespace Formele_Methoden_app
             newPart.startState = "q0";
             newPart.finalState = "q1";
 
-            newPart.states = new HashSet<string> { newPart.startState, newPart.finalState };
-
-            newPart.states.Concat(containedPart.states);
+            string[] newStates = { newPart.startState, newPart.finalState };
+            foreach (string state in newStates) { newPart.states.Add(state); }
 
             //Followed by the transitions
-            newPart.transitions = new HashSet<Transition<string>>
+            Transition<string>[] newTransitions =
             {
                 new Transition<string>("q0", containedPart.startState),
                 new Transition<string>(containedPart.finalState, "q1"),
-                new Transition<string>(containedPart.startState, containedPart.finalState)
+                new Transition<string>(containedPart.finalState, containedPart.startState)
             };
 
-            IEnumerable<Transition<string>> allTransitions = newPart.transitions.Concat(containedPart.transitions);
-            newPart.transitions = new HashSet<Transition<string>>(allTransitions);
+            foreach (Transition<string> transition in newTransitions) { newPart.transitions.Add(transition); }
 
             return newPart;
         }
@@ -373,7 +448,7 @@ namespace Formele_Methoden_app
         /// </summary>
         /// <param name="subString">The new part of the Regex to contain within this part.</param>
         /// <returns>A <see cref="ThompsonPart"/> that has all states and transitions.</returns>
-        private ThompsonPart GenerateAsterixOperatorConstruction(string subString)
+        private ThompsonPart GenerateAsterixOperatorConstruction(string subString)//Works
         {
             ThompsonPart newPart = new ThompsonPart();
             ThompsonPart containedPart = GenerateThompsonPart(subString);
@@ -381,12 +456,23 @@ namespace Formele_Methoden_app
             #region State consolidation
             //Consolidate states here so that all states are unique (this is not useable by multiple constructions, since those differ in contained elements
             int containedStatesCount = containedPart.states.Count;
-            int leftStatesCountPlusOne = containedStatesCount + 1;
+            Dictionary<string, string> remappedStates = new Dictionary<string, string>();
+            int stateIndex = 2;
 
-            containedPart.startState = "q2";                                                                     //Contained part start state = q2, q0 is our start state for the or and q1 the end state
-            containedPart.finalState = "q" + leftStatesCountPlusOne;                                             //Contained part final state = all contained states count, due to being shifted one over
-            containedPart.states = new HashSet<string> { containedPart.startState, containedPart.finalState };
-            for (int i = 2; i < leftStatesCountPlusOne; i++) { containedPart.states.Add("q" + i); }              //States in between: for(int i = 1, i < count - 1, i++)
+            foreach (string state in containedPart.states)
+            {
+                remappedStates.Add(state, "q" + stateIndex);
+                stateIndex++;
+                newPart.states.Add(remappedStates[state]);
+            }
+
+            containedPart.startState = remappedStates[containedPart.startState];
+            containedPart.finalState = remappedStates[containedPart.finalState];
+
+            foreach (Transition<string> transition in containedPart.transitions)
+            {
+                newPart.transitions.Add(new Transition<string>(remappedStates[transition.FromState], remappedStates[transition.ToState], transition.Identifier));
+            }
 
             if (containedPart.states.Count != containedStatesCount) { throw new Exception("Mismatch in list sizes of left part"); }
             #endregion
@@ -395,21 +481,19 @@ namespace Formele_Methoden_app
             newPart.startState = "q0";
             newPart.finalState = "q1";
 
-            newPart.states = new HashSet<string> { newPart.startState, newPart.finalState };
-
-            newPart.states.Concat(containedPart.states);
+            string[] newStates = { newPart.startState, newPart.finalState };
+            foreach (string state in newStates) { newPart.states.Add(state); }
 
             //Followed by the transitions
-            newPart.transitions = new HashSet<Transition<string>>
+            Transition<string>[] newTransitions =
             {
                 new Transition<string>("q0", containedPart.startState),
                 new Transition<string>(containedPart.finalState, "q1"),
-                new Transition<string>(containedPart.startState, containedPart.finalState),
+                new Transition<string>(containedPart.finalState, containedPart.startState),
                 new Transition<string>(newPart.startState, newPart.finalState)
             };
 
-            IEnumerable<Transition<string>> allTransitions = newPart.transitions.Concat(containedPart.transitions);
-            newPart.transitions = new HashSet<Transition<string>>(allTransitions);
+            foreach (Transition<string> transition in newTransitions) { newPart.transitions.Add(transition); }
 
             return newPart;
         }
@@ -420,5 +504,24 @@ namespace Formele_Methoden_app
         /// <param name="c">The character to check.</param>
         /// <returns>A boolean that is true if the character fits in one of the three sets.</returns>
         private bool IsUsableCharacter(char c) { return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'); }
+
+        /// <summary>
+        /// Removes the outer brackets of a regex.
+        /// </summary>
+        /// <param name="regex">The string regex to strip</param>
+        /// <returns>The regex without the brackets</returns>
+        private string StripRegexOfOuterBrackets(string regex)
+        {
+            List<int> openingBrackets = new List<int>();
+            List<int> closingBrackets = new List<int>();
+
+            for(int i = 0; i < regex.Length; i++)
+            {
+                if (regex[i] == '(') { openingBrackets.Add(i); }
+                if (regex[i] == ')') { closingBrackets.Add(i); }
+            }
+
+            return regex.Substring(openingBrackets.First() + 1, (closingBrackets.Last() - openingBrackets.First() - 1));
+        }
     }
 }

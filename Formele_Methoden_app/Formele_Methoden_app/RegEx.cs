@@ -183,12 +183,12 @@ namespace Formele_Methoden_app
 
             if (leftPart != string.Empty)
             {
-                if (operatorAsChar == '*' || operatorAsChar == '+') { completeString = "(" + leftPart + ")" + completeString; }
+                if (operatorAsChar != '|') { completeString = "(" + leftPart + ")" + completeString; }
                 else { completeString = leftPart + completeString; }
             }
             if (rightPart != string.Empty)
             {
-                if (operatorAsChar == '*' || operatorAsChar == '+') { completeString =  completeString + "(" + rightPart + ")"; }
+                if (operatorAsChar != '|') { completeString =  completeString + "(" + rightPart + ")"; }
                 else { completeString = completeString + rightPart; }
             }
                 
@@ -217,13 +217,13 @@ namespace Formele_Methoden_app
 
             if (leftPart != string.Empty)
             {
-                if (operatorAsChar == '*' || operatorAsChar == '+') { leftString = "(" + leftPart + ")" + leftString; }
+                if (operatorAsChar != '|') { leftString = "(" + leftPart + ")" + leftString; }
                 else { leftString = leftPart + leftString; }
             }
 
             if (rightPart != string.Empty)
             {
-                if (operatorAsChar == '*' || operatorAsChar == '+') { leftString = leftString + "(" + rightPart + ")"; }
+                if (operatorAsChar != '|') { leftString = leftString + "(" + rightPart + ")"; }
                 else { leftString = leftString + rightPart; }
             }
 
@@ -251,13 +251,13 @@ namespace Formele_Methoden_app
 
             if (leftPart != string.Empty)
             {
-                if (operatorAsChar == '*' || operatorAsChar == '+') { rightString = "(" + leftPart + ")" + rightString; }
+                if (operatorAsChar != '|') { rightString = "(" + leftPart + ")" + rightString; }
                 else { rightString = leftPart + rightString; }
             }
 
             if (rightPart != string.Empty)
             {
-                if (operatorAsChar == '*' || operatorAsChar == '+') { rightString = rightString + "(" + rightPart + ")"; }
+                if (operatorAsChar != '|') { rightString = rightString + "(" + rightPart + ")"; }
                 else { rightString = rightString + rightPart; }
             }
 
