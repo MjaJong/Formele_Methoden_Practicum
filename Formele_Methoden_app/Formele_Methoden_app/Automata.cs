@@ -74,6 +74,10 @@ namespace Formele_Methoden_app
             }
         }
 
+        /// <summary>
+        /// Check to see if this <see cref="Automata{T}"/> is a dfa.
+        /// </summary>
+        /// <returns>True if the <see cref="Automata{T}"/> is a DFA.</returns>
         public bool IsDfa()
         {
             bool dfa = true;
@@ -108,11 +112,21 @@ namespace Formele_Methoden_app
         }
 
         /// <summary>
+        /// Checks if a string is valid for this automaton
+        /// </summary>
+        /// <returns>A boolean indicating if the string is acceptable.</returns>
+        public bool IsStringAcceptable(string stringToVerify)
+        {
+            if (IsDfa()) { return IsStringAcceptableDfa(stringToVerify); }
+            else { return IsStringAcceptableNdfa(stringToVerify); }
+        }
+
+        /// <summary>
         /// Checks whether the given string fits within this automata
         /// </summary>
         /// <param name="stringToVerify">The string to check.</param>
         /// <returns>A boolean indicator that is true if the string can be formed by this automata by traversing it's nodes.</returns>
-        public bool IsStringAcceptable(string stringToVerify)
+        private bool IsStringAcceptableDfa(string stringToVerify)
         {
             bool stringIsAccepted = false;
 
@@ -134,10 +148,10 @@ namespace Formele_Methoden_app
                 }
 
                 IEnumerable<Transition<T>> validTransitions = transitions.Where(x => x.Identifier == charToCheckFor && x.FromState.Equals(state));
-                
-                foreach(Transition<T> transition in validTransitions)
+
+                foreach (Transition<T> transition in validTransitions)
                 {
-                    stringIsAccepted = CheckNextNode(transition.ToState, stringToVerify);
+                    stringIsAccepted = CheckNextNodeDfa(transition.ToState, stringToVerify);
                     if (stringIsAccepted) { break; }
                 }
             }
@@ -152,7 +166,7 @@ namespace Formele_Methoden_app
         /// <param name="state">the state to check</param>
         /// <param name="remainingString">the remainder of the string to check</param>
         /// <returns>A boolean that is true if the string has been fully formed</returns>
-        private bool CheckNextNode(T state, string stringToVerify)
+        private bool CheckNextNodeDfa(T state, string stringToVerify)
         {
             bool stringIsAccepted = false;
 
@@ -171,11 +185,119 @@ namespace Formele_Methoden_app
             
             foreach(Transition<T> transition in validTransitions)
             {
-                stringIsAccepted = CheckNextNode(transition.ToState, stringToVerify);
+                stringIsAccepted = CheckNextNodeDfa(transition.ToState, stringToVerify);
                 if (stringIsAccepted) { break; }
             }
 
             return stringIsAccepted;
+        }
+
+        /// <summary>
+        /// Checks whether the given string fits within this automata
+        /// </summary>
+        /// <param name="stringToVerify">The string to check.</param>
+        /// <returns>A boolean indicator that is true if the string can be formed by this automata by traversing it's nodes.</returns>
+        private bool IsStringAcceptableNdfa(string stringToVerify)
+        {
+            bool stringIsAccepted = false;
+
+            //Pak start states + eerste element in char array
+            char charToCheckFor = stringToVerify[0];
+            HashSet<T> startingStates = startStates;
+
+            //Verwijder eerste character
+            if (stringToVerify.Count() > 1) { stringToVerify = stringToVerify.Substring(1); }
+            else stringToVerify = "";
+
+            //Voor iedere uitgaande transitie check of het kan met het gegeven character
+            foreach (T state in startingStates)
+            {
+                if (stringToVerify.Count() == 0)
+                {
+                    stringIsAccepted = finalStates.Contains(state);
+                    break;
+                }
+
+                IEnumerable<Transition<T>> validTransitions = transitions.Where(x => (x.Identifier == charToCheckFor || x.Identifier == '$') && x.FromState.Equals(state));
+
+                foreach (Transition<T> transition in validTransitions)
+                {
+                    if(transition.Identifier != '$') { stringIsAccepted = CheckNextNodeNdfa(transition, stringToVerify); }
+                    else { stringIsAccepted = CheckNextNodeNdfa(transition, charToCheckFor + stringToVerify); }
+                    if (stringIsAccepted) { break; }
+                }
+            }
+
+            //Als er een terug komt met true, dan bestaat de string
+            return stringIsAccepted;
+        }
+
+        /// <summary>
+        /// Recursively checks to see if we can form the string
+        /// </summary>
+        /// <param name="givenTransition">the transition to check</param>
+        /// <param name="remainingString">the remainder of the string to check</param>
+        /// <returns>A boolean that is true if the string has been fully formed</returns>
+        private bool CheckNextNodeNdfa(Transition<T> givenTransition, string stringToVerify)
+        {
+            bool stringIsAccepted = false;
+
+            if (stringToVerify.Count() == 0) //Early escape if we're finished
+            {
+                stringIsAccepted = finalStates.Contains(givenTransition.ToState);
+
+                IEnumerable<Transition<T>> possibleTransitionsLeadingToEndState = transitions.Where(x => x.Identifier == '$' && x.FromState.Equals(givenTransition.ToState));
+                stringIsAccepted = CheckEmptyTransitions(possibleTransitionsLeadingToEndState);
+
+                return stringIsAccepted;
+            }
+
+            char currentCharacter = stringToVerify[0];
+
+            if (stringToVerify.Count() > 1) { stringToVerify = stringToVerify.Substring(1); }
+            else stringToVerify = "";
+
+            IEnumerable<Transition<T>> validTransitions = transitions.Where(x => (x.Identifier == currentCharacter || x.Identifier == '$') && x.FromState.Equals(givenTransition.ToState));
+
+            foreach (Transition<T> transition in validTransitions)
+            {
+                if (transition.Identifier != '$') { stringIsAccepted = CheckNextNodeNdfa(transition, stringToVerify); }
+                else { stringIsAccepted = CheckNextNodeNdfa(transition, currentCharacter + stringToVerify); }
+                if (stringIsAccepted) { break; }
+            }
+
+            return stringIsAccepted;
+        }
+
+        /// <summary>
+        /// Checks if by traversing the given transitions, then following all other empty transitions.
+        /// </summary>
+        /// <param name="givenTransitions">The transitions to check.</param>
+        /// <returns>A boolean that is true if we can traverse an empty path.</returns>
+        private bool CheckEmptyTransitions(IEnumerable<Transition<T>> givenTransitions)
+        {
+            bool foundEmptyTransitionToFinalState = true;
+
+            //Check if we can jump to the final state
+            foreach(Transition<T> transition in givenTransitions)
+            {
+                if (finalStates.Contains(transition.ToState)) { foundEmptyTransitionToFinalState = true; }
+                if (foundEmptyTransitionToFinalState) { break; }
+            }
+
+            //If not, try the other states or return when we can't traverse any further.
+            if(!foundEmptyTransitionToFinalState)
+            {
+                List<T> newFromStates = new List<T>();
+                foreach(Transition<T> transition in givenTransitions) { newFromStates.Add(transition.ToState); }
+
+                IEnumerable<Transition<T>> transitionsToCheck = transitions.Where(x => x.Identifier == '$' && newFromStates.Contains(x.FromState));
+
+                if(transitionsToCheck.Count() <= 0) { return foundEmptyTransitionToFinalState; }
+                else { foundEmptyTransitionToFinalState = CheckEmptyTransitions(transitionsToCheck); }
+            }
+
+            return foundEmptyTransitionToFinalState;
         }
 
         /// <summary>
