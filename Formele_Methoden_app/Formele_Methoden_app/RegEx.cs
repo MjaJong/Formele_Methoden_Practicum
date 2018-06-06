@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Formele_Methoden_app
 {
@@ -23,10 +20,14 @@ namespace Formele_Methoden_app
         private RegExp left;
         private RegExp right;
 
+        public RegExp LeftRegExp { get { return left; } }
+        public RegExp RightRegExp { get { return right; } }
+        public Operator Op { get { return op; } }
+
         public RegExp()
         {
             op = Operator.ONE;
-            terminals = "";
+            terminals = string.Empty;
             left = null;
             right = null;
         }
@@ -159,6 +160,129 @@ namespace Formele_Methoden_app
             result.left = this;
             result.right = e2;
             return result;
+        }
+
+        /// <summary>
+        /// to string method that recursively walks through all left and right parts, adding them together and returning (hopefully) the complete language as a string
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            string leftPart = "";
+            string rightPart = "";
+
+            if (left != null) { leftPart = TraverseLeft(left); }
+            if (right != null) { rightPart = TraverseRight(right); }
+
+            char operatorAsChar = EnumToChar(op);
+
+            //So i guess its left + terminals + operator + right
+            string completeString = terminals;
+
+            if (operatorAsChar != '$') { completeString = completeString + operatorAsChar; }
+
+            if (leftPart != string.Empty)
+            {
+                if (operatorAsChar != '|') { completeString = "(" + leftPart + ")" + completeString; }
+                else { completeString = leftPart + completeString; }
+            }
+            if (rightPart != string.Empty)
+            {
+                if (operatorAsChar != '|') { completeString =  completeString + "(" + rightPart + ")"; }
+                else { completeString = completeString + rightPart; }
+            }
+                
+
+            return completeString;
+        }
+
+        /// <summary>
+        /// Traverses all left fields of the <see cref="RegExp"/>.
+        /// </summary>
+        /// <param name="left">The initial left part of the <see cref="RegExp"/>.</param>
+        /// <returns>Returns the final string of everyting left of the original.</returns>
+        private string TraverseLeft(RegExp left)
+        {
+            string leftPart = "";
+            string rightPart = "";
+            char operatorAsChar = '$';
+
+            if (left.LeftRegExp != null) { leftPart = TraverseLeft(left.LeftRegExp); }
+            if (left.op != Operator.ONE) { operatorAsChar =  EnumToChar(left.op); }
+            if (left.RightRegExp != null) { rightPart = TraverseRight(left.RightRegExp); }
+
+            string leftString = left.terminals;
+
+            if (operatorAsChar != '$') { leftString = leftString + operatorAsChar; }
+
+            if (leftPart != string.Empty)
+            {
+                if (operatorAsChar != '|') { leftString = "(" + leftPart + ")" + leftString; }
+                else { leftString = leftPart + leftString; }
+            }
+
+            if (rightPart != string.Empty)
+            {
+                if (operatorAsChar != '|') { leftString = leftString + "(" + rightPart + ")"; }
+                else { leftString = leftString + rightPart; }
+            }
+
+            return leftString;
+        }
+
+        /// <summary>
+        /// Traverses all left fields of the <see cref="RegExp"/>.
+        /// </summary>
+        /// <param name="right">The initial right part of the <see cref="RegExp"/>.</param>
+        /// <returns>Returns the final string of everyting right of the original.</returns>
+        private string TraverseRight(RegExp right)
+        {
+            string leftPart = "";
+            string rightPart = "";
+            char operatorAsChar = '$';
+
+            if (right.LeftRegExp != null) { leftPart = TraverseLeft(right.LeftRegExp); }
+            if (right.op != Operator.ONE) { operatorAsChar = EnumToChar(right.op); }
+            if (right.RightRegExp != null) { rightPart = TraverseRight(right.RightRegExp); }
+
+            string rightString = right.terminals;
+
+            if (operatorAsChar != '$') { rightString = rightString + operatorAsChar; }
+
+            if (leftPart != string.Empty)
+            {
+                if (operatorAsChar != '|') { rightString = "(" + leftPart + ")" + rightString; }
+                else { rightString = leftPart + rightString; }
+            }
+
+            if (rightPart != string.Empty)
+            {
+                if (operatorAsChar != '|') { rightString = rightString + "(" + rightPart + ")"; }
+                else { rightString = rightString + rightPart; }
+            }
+
+            return rightString;
+        }
+
+        /// <summary>
+        /// Translates a <see cref="Operator"/> to a <see cref="char"/>.
+        /// </summary>
+        /// <param name="op">The operator to translate.</param>
+        /// <returns>The <see cref="char"/> that represents the given <see cref="Operator"/>.</returns>
+        private char EnumToChar(Operator op)
+        {
+            char operatorAsChar = '$';
+
+            //Also, the worlds worst switch case
+            switch (op)
+            {
+                case Operator.DOT: operatorAsChar = '.'; break;
+                case Operator.OR: operatorAsChar = '|'; break;
+                case Operator.PLUS: operatorAsChar = '+'; break;
+                case Operator.STAR: operatorAsChar = '*'; break;
+            }
+
+            return operatorAsChar;
         }
     }
 }
