@@ -65,6 +65,11 @@ namespace Formele_Methoden_app
             Console.WriteLine("String {0} is a {1} string for Auto3.", THOMPSON_TEST_3, auto3.IsStringAcceptable(THOMPSON_TEST_3) ? "valid" : "invalid");
             Console.WriteLine("-----------------------------------------");
 
+            ret.testLanguage();
+            Console.WriteLine("-----------------------------------------\n");
+
+            DiagramWriter writer = new DiagramWriter();
+            writer.WriteToGVFile(auto1, "test", "", true);
             Console.Read();
         }
     }

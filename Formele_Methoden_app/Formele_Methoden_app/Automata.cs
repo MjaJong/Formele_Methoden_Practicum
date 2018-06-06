@@ -6,11 +6,11 @@ namespace Formele_Methoden_app
 {
     public class Automata<T> where T : IComparable
     {
-        private HashSet<Transition<T>> transitions;
-        private HashSet<T> states;
-        private HashSet<T> startStates;
-        private HashSet<T> finalStates;
-        private HashSet<char> symbols;
+        public HashSet<Transition<T>> transitions { get; private set; }
+        public HashSet<T> states { get; private set; }
+        public HashSet<T> startStates { get; private set; }
+        public HashSet<T> finalStates { get; private set; }
+        public HashSet<char> symbols { get; private set; }
 
         public Automata(char[] chars) : this(new HashSet<char>(chars))
         {
