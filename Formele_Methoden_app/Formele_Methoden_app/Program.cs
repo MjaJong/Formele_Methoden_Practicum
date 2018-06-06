@@ -65,6 +65,35 @@ namespace Formele_Methoden_app
             Console.WriteLine("String {0} is a {1} string for Auto3.", THOMPSON_TEST_3, auto3.IsStringAcceptable(THOMPSON_TEST_3) ? "valid" : "invalid");
             Console.WriteLine("-----------------------------------------");
 
+            //Builds: a*(aa+|ba*b)*(abba|baab|bbbb)+
+            RegExp secondTest1 = new RegExp("a");
+            RegExp secondTest2 = new RegExp("b");
+            RegExp secondTest3 = new RegExp("abba");
+            RegExp secondTest4 = new RegExp("baab");
+            RegExp secondTest5 = new RegExp("bbbb");
+
+            RegExp aStar = secondTest1.Star();
+            RegExp aPlus = secondTest1.Plus();
+            RegExp orFirstHalf = secondTest1.Dot(aPlus); //a.a+
+            RegExp orSecondHalf = secondTest2.Dot(aStar.Dot(secondTest2));//b.a*.b
+            RegExp firstOr = orFirstHalf.Or(orSecondHalf);//a.a+|b.a*.b
+            RegExp firstOrStarred = firstOr.Star();//(a.a+|b.a*.b)*
+            RegExp secondTestFirstHalf = aStar.Dot(firstOrStarred);//a*.(a.a+|b.a*.b)*
+            RegExp secondOr = secondTest3.Or(secondTest4.Or(secondTest5));//abba|baab|bbbb
+            RegExp secondTestSecondHalf = secondOr.Plus();//(abba|baab|bbbb)+
+            RegExp secondTest = secondTestFirstHalf.Dot(secondTestSecondHalf);//(a*.(a.a+|b.a*.b)*).((abba|baab|bbbb)+)
+
+
+            Console.WriteLine(secondTest);
+            Console.WriteLine("-----------------------------------------");
+
+            Automata<string> auto4 = thompson.GenerateNDFA(secondTest);//This fails due to the final dot operator, which fucking sucks. Probably anyway. I have no idea of how to fix this.
+            Console.WriteLine(auto4.IsDfa());
+            Console.WriteLine("-----------------------------------------");
+
+            auto4.PrintTransitions();
+            Console.WriteLine("-----------------------------------------");
+
             Console.Read();
         }
     }

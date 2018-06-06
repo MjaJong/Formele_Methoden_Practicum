@@ -89,7 +89,6 @@ namespace Formele_Methoden_app
                 if (regexAsString[i] == '+' && regexOperator == '$') { regexOperator = '+'; operatorPosition = i; }
                 if (regexAsString[i] == '*' && regexOperator == '$') { regexOperator = '*'; operatorPosition = i; }
 
-
                 if(regexHasBrackets) //Thus we have brackets in our regex
                 {
                     //Check to see if we should break, or that we should continue (should one of the operators be contained within brackets)
