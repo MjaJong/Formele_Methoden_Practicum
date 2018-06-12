@@ -15,6 +15,14 @@ namespace Formele_Methoden_app
         private const string THOMPSON_TEST_2 = "ababaabb";
         private const string THOMPSON_TEST_3 = "abaababb";
 
+        private const string NDFA_TO_DFA_VALID_1 = "aaaa";
+        private const string NDFA_TO_DFA_VALID_2 = "aabaaaa";
+        private const string NDFA_TO_DFA_VALID_3 = "bbaaa";
+        private const string NDFA_TO_DFA_VALID_4 = "bbabbbaaa";
+        private const string NDFA_TO_DFA_INVALID_1 = "bbb";
+        private const string NDFA_TO_DFA_INVALID_2 = "bbaa";
+        private const string NDFA_TO_DFA_INVALID_3 = "aabbbb";
+
         static void Main(string[] args)
         {
             Automata<String> auto1 = TestAutomata.getExampleSlide8Lesson2();
@@ -63,6 +71,61 @@ namespace Formele_Methoden_app
             Console.WriteLine("String {0} is a {1} string for Auto3.", THOMPSON_TEST_1, auto3.IsStringAcceptable(THOMPSON_TEST_1) ? "valid" : "invalid");
             Console.WriteLine("String {0} is a {1} string for Auto3.", THOMPSON_TEST_2, auto3.IsStringAcceptable(THOMPSON_TEST_2) ? "valid" : "invalid");
             Console.WriteLine("String {0} is a {1} string for Auto3.", THOMPSON_TEST_3, auto3.IsStringAcceptable(THOMPSON_TEST_3) ? "valid" : "invalid");
+            Console.WriteLine("-----------------------------------------");
+
+            //At this point, somehow this regexp screws up. For now NDFA -> DFA is being implemented
+            ////Builds: a*(aa+|ba*b)*(abba|baab|bbbb)+
+            //RegExp secondTest1 = new RegExp("a");
+            //RegExp secondTest2 = new RegExp("b");
+            //RegExp secondTest3 = new RegExp("abba");
+            //RegExp secondTest4 = new RegExp("baab");
+            //RegExp secondTest5 = new RegExp("bbbb");
+
+            //RegExp aStar = secondTest1.Star();
+            //RegExp aPlus = secondTest1.Plus();
+            //RegExp orFirstHalf = secondTest1.Dot(aPlus); //a.a+
+            //RegExp orSecondHalf = secondTest2.Dot(aStar.Dot(secondTest2));//b.a*.b
+            //RegExp firstOr = orFirstHalf.Or(orSecondHalf);//a.a+|b.a*.b
+            //RegExp firstOrStarred = firstOr.Star();//(a.a+|b.a*.b)*
+            //RegExp secondTestFirstHalf = aStar.Dot(firstOrStarred);//a*.(a.a+|b.a*.b)*
+            //RegExp secondOr = secondTest3.Or(secondTest4.Or(secondTest5));//abba|baab|bbbb
+            //RegExp secondTestSecondHalf = secondOr.Plus();//(abba|baab|bbbb)+
+            //RegExp secondTest = secondTestFirstHalf.Dot(secondTestSecondHalf);//(a*.(a.a+|b.a*.b)*).((abba|baab|bbbb)+)
+
+
+            //Console.WriteLine(secondTest);
+            //Console.WriteLine("-----------------------------------------");
+
+            //Automata<string> auto4 = thompson.GenerateNDFA(secondTest);//This fails due to the final dot operator, which fucking sucks. Probably anyway. I have no idea of how to fix this.
+            //Console.WriteLine(auto4.IsDfa());
+            //Console.WriteLine("-----------------------------------------");
+
+            //auto4.PrintTransitions();
+            //Console.WriteLine("-----------------------------------------");
+
+            Automata<string> auto4 = TestAutomata.ndfaToDfaTest();
+            Console.WriteLine("auto4 is dfa? " + auto4.IsDfa());
+            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_VALID_1, auto4.IsStringAcceptable(NDFA_TO_DFA_VALID_1) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_VALID_2, auto4.IsStringAcceptable(NDFA_TO_DFA_VALID_2) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_VALID_3, auto4.IsStringAcceptable(NDFA_TO_DFA_VALID_3) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_VALID_4, auto4.IsStringAcceptable(NDFA_TO_DFA_VALID_4) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_INVALID_1, auto4.IsStringAcceptable(NDFA_TO_DFA_INVALID_1) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_INVALID_2, auto4.IsStringAcceptable(NDFA_TO_DFA_INVALID_2) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_INVALID_3, auto4.IsStringAcceptable(NDFA_TO_DFA_INVALID_3) ? "valid" : "invalid");
+            Console.WriteLine("-----------------------------------------");
+
+            NdfaToDfa<string> converter = new NdfaToDfa<string>();
+            Automata<string> auto4DFA = converter.TransformNdfaIntoDfa(auto4);
+            Console.WriteLine("auto4DFA is dfa? " + auto4DFA.IsDfa());
+            Console.WriteLine("-----------------------------------------");
+
+            auto4DFA.PrintTransitions();
+            Console.WriteLine("-----------------------------------------");
+
+            foreach(string state in auto4DFA.StartStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in auto4DFA.FinalStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
 
             Console.Read();

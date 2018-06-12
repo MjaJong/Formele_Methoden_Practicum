@@ -6,11 +6,11 @@ namespace Formele_Methoden_app
 {
     public class Automata<T> where T : IComparable
     {
-        private HashSet<Transition<T>> transitions;
-        private HashSet<T> states;
-        private HashSet<T> startStates;
-        private HashSet<T> finalStates;
-        private HashSet<char> symbols;
+        public HashSet<T> StartStates { get; private set; }
+        public HashSet<T> FinalStates { get; private set; }
+        public HashSet<T> States { get; private set; }
+        public HashSet<char> Symbols { get; private set; }
+        public HashSet<Transition<T>> Transitions { get; private set; }
 
         public Automata(char[] chars) : this(new HashSet<char>(chars))
         {
@@ -23,13 +23,13 @@ namespace Formele_Methoden_app
         /// <param name="symbols"></param>
         public Automata(HashSet<char> symbols = null)
         {
-            if (symbols == null) this.symbols = new HashSet<char>();
-            else this.symbols = symbols;
+            if (symbols == null) Symbols = new HashSet<char>();
+            else Symbols = symbols;
 
-            transitions = new HashSet<Transition<T>>();
-            states = new HashSet<T>();
-            startStates = new HashSet<T>();
-            finalStates = new HashSet<T>();
+            Transitions = new HashSet<Transition<T>>();
+            States = new HashSet<T>();
+            StartStates = new HashSet<T>();
+            FinalStates = new HashSet<T>();
         }
 
         /// <summary>
@@ -38,9 +38,9 @@ namespace Formele_Methoden_app
         /// <param name="transition"></param>
         public void AddTransition(Transition<T> transition)
         {
-            transitions.Add(transition);
-            states.Add(transition.FromState);
-            states.Add(transition.ToState);
+            Transitions.Add(transition);
+            States.Add(transition.FromState);
+            States.Add(transition.ToState);
         }
 
         /// <summary>
@@ -49,8 +49,8 @@ namespace Formele_Methoden_app
         /// <param name="state">The state</param>
         public void DefineAsStartState(T state)
         {
-            states.Add(state);
-            startStates.Add(state);
+            States.Add(state);
+            StartStates.Add(state);
         }
 
         /// <summary>
@@ -59,8 +59,8 @@ namespace Formele_Methoden_app
         /// <param name="state">The state</param>
         public void DefineAsFinalState(T state)
         {
-            states.Add(state);
-            finalStates.Add(state);
+            States.Add(state);
+            FinalStates.Add(state);
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Formele_Methoden_app
         /// </summary>
         public void PrintTransitions()
         {
-            foreach (Transition<T> transition in transitions)
+            foreach (Transition<T> transition in Transitions)
             {
                 Console.WriteLine(transition);
             }
@@ -82,9 +82,9 @@ namespace Formele_Methoden_app
         {
             bool dfa = true;
 
-            foreach (T from in states)
+            foreach (T from in States)
             {
-                foreach (char symbol in symbols)
+                foreach (char symbol in Symbols)
                 {
                     dfa = dfa && GetToStates(from, symbol).Count == 1;
                 }
@@ -103,7 +103,7 @@ namespace Formele_Methoden_app
         {
            List<T> toStates =  new List<T>();
 
-            foreach(Transition<T> transition in transitions)
+            foreach(Transition<T> transition in Transitions)
             {
                 if(transition.FromState.Equals(from) && transition.Identifier.Equals(symbol)) { toStates.Add(transition.ToState); }
             }
@@ -132,22 +132,22 @@ namespace Formele_Methoden_app
 
             //Pak start states + eerste element in char array
             char charToCheckFor = stringToVerify[0];
-            HashSet<T> startingStates = startStates;
+            HashSet<T> startingStates = StartStates;
 
             //Verwijder eerste character
             if (stringToVerify.Count() > 1) { stringToVerify = stringToVerify.Substring(1); }
-            else stringToVerify = "";
+            else stringToVerify = string.Empty;
 
             //Voor iedere uitgaande transitie check of het kan met het gegeven character
             foreach (T state in startingStates)
             {
-                if(stringToVerify.Count() == 0)
+                if(stringToVerify == string.Empty)
                 {
-                    stringIsAccepted = finalStates.Contains(state);
+                    stringIsAccepted = FinalStates.Contains(state);
                     break;
                 }
 
-                IEnumerable<Transition<T>> validTransitions = transitions.Where(x => x.Identifier == charToCheckFor && x.FromState.Equals(state));
+                IEnumerable<Transition<T>> validTransitions = Transitions.Where(x => x.Identifier == charToCheckFor && x.FromState.Equals(state));
 
                 foreach (Transition<T> transition in validTransitions)
                 {
@@ -170,18 +170,18 @@ namespace Formele_Methoden_app
         {
             bool stringIsAccepted = false;
 
-            if (stringToVerify.Count() == 0) //Early escape if we're finished
+            if (stringToVerify == string.Empty) //Early escape if we're finished
             {
-                stringIsAccepted = finalStates.Contains(state);
+                stringIsAccepted = FinalStates.Contains(state);
                 return stringIsAccepted;
             } 
 
             char currentCharacter = stringToVerify[0];
 
             if (stringToVerify.Count() > 1) { stringToVerify = stringToVerify.Substring(1); }
-            else stringToVerify = "";
+            else stringToVerify = string.Empty;
 
-            IEnumerable<Transition<T>> validTransitions = transitions.Where(x => x.Identifier == currentCharacter && x.FromState.Equals(state));
+            IEnumerable<Transition<T>> validTransitions = Transitions.Where(x => x.Identifier == currentCharacter && x.FromState.Equals(state));
             
             foreach(Transition<T> transition in validTransitions)
             {
@@ -203,31 +203,31 @@ namespace Formele_Methoden_app
 
             //Pak start states + eerste element in char array
             char charToCheckFor = stringToVerify[0];
-            HashSet<T> startingStates = startStates;
+            HashSet<T> startingStates = StartStates;
 
             //Verwijder eerste character
             if (stringToVerify.Count() > 1) { stringToVerify = stringToVerify.Substring(1); }
-            else stringToVerify = "";
+            else stringToVerify = string.Empty;
 
             //Voor iedere uitgaande transitie check of het kan met het gegeven character
             foreach (T state in startingStates)
             {
-                if (stringToVerify.Count() == 0)
+                if (stringToVerify == string.Empty)
                 {
-                    stringIsAccepted = finalStates.Contains(state);
+                    stringIsAccepted = FinalStates.Contains(state);
                     break;
                 }
 
-                IEnumerable<Transition<T>> validTransitions = transitions.Where(x => (x.Identifier == charToCheckFor || x.Identifier == '$') && x.FromState.Equals(state));
+                IEnumerable<Transition<T>> validTransitions = Transitions.Where(x => (x.Identifier == charToCheckFor || x.Identifier == '$') && x.FromState.Equals(state));
 
                 foreach (Transition<T> transition in validTransitions)
                 {
                     if(transition.Identifier != '$') { stringIsAccepted = CheckNextNodeNdfa(transition, stringToVerify); }
                     else { stringIsAccepted = CheckNextNodeNdfa(transition, charToCheckFor + stringToVerify); }
+
                     if (stringIsAccepted) { break; }
                 }
             }
-
             //Als er een terug komt met true, dan bestaat de string
             return stringIsAccepted;
         }
@@ -242,11 +242,12 @@ namespace Formele_Methoden_app
         {
             bool stringIsAccepted = false;
 
-            if (stringToVerify.Count() == 0) //Early escape if we're finished
+            if (stringToVerify == string.Empty) //Early escape if we're finished
             {
-                stringIsAccepted = finalStates.Contains(givenTransition.ToState);
+                stringIsAccepted = FinalStates.Contains(givenTransition.ToState);
+                if (stringIsAccepted) { return stringIsAccepted; }
 
-                IEnumerable<Transition<T>> possibleTransitionsLeadingToEndState = transitions.Where(x => x.Identifier == '$' && x.FromState.Equals(givenTransition.ToState));
+                IEnumerable<Transition<T>> possibleTransitionsLeadingToEndState = Transitions.Where(x => x.Identifier == '$' && x.FromState.Equals(givenTransition.ToState));
                 stringIsAccepted = CheckEmptyTransitions(possibleTransitionsLeadingToEndState);
 
                 return stringIsAccepted;
@@ -255,17 +256,17 @@ namespace Formele_Methoden_app
             char currentCharacter = stringToVerify[0];
 
             if (stringToVerify.Count() > 1) { stringToVerify = stringToVerify.Substring(1); }
-            else stringToVerify = "";
+            else stringToVerify = string.Empty;
 
-            IEnumerable<Transition<T>> validTransitions = transitions.Where(x => (x.Identifier == currentCharacter || x.Identifier == '$') && x.FromState.Equals(givenTransition.ToState));
+            IEnumerable<Transition<T>> validTransitions = Transitions.Where(x => (x.Identifier == currentCharacter || x.Identifier == '$') && x.FromState.Equals(givenTransition.ToState));
 
             foreach (Transition<T> transition in validTransitions)
             {
                 if (transition.Identifier != '$') { stringIsAccepted = CheckNextNodeNdfa(transition, stringToVerify); }
                 else { stringIsAccepted = CheckNextNodeNdfa(transition, currentCharacter + stringToVerify); }
+
                 if (stringIsAccepted) { break; }
             }
-
             return stringIsAccepted;
         }
 
@@ -276,12 +277,12 @@ namespace Formele_Methoden_app
         /// <returns>A boolean that is true if we can traverse an empty path.</returns>
         private bool CheckEmptyTransitions(IEnumerable<Transition<T>> givenTransitions)
         {
-            bool foundEmptyTransitionToFinalState = true;
+            bool foundEmptyTransitionToFinalState = false;
 
             //Check if we can jump to the final state
             foreach(Transition<T> transition in givenTransitions)
             {
-                if (finalStates.Contains(transition.ToState)) { foundEmptyTransitionToFinalState = true; }
+                if (FinalStates.Contains(transition.ToState)) { foundEmptyTransitionToFinalState = true; }
                 if (foundEmptyTransitionToFinalState) { break; }
             }
 
@@ -291,7 +292,7 @@ namespace Formele_Methoden_app
                 List<T> newFromStates = new List<T>();
                 foreach(Transition<T> transition in givenTransitions) { newFromStates.Add(transition.ToState); }
 
-                IEnumerable<Transition<T>> transitionsToCheck = transitions.Where(x => x.Identifier == '$' && newFromStates.Contains(x.FromState));
+                IEnumerable<Transition<T>> transitionsToCheck = Transitions.Where(x => x.Identifier == '$' && newFromStates.Contains(x.FromState));
 
                 if(transitionsToCheck.Count() <= 0) { return foundEmptyTransitionToFinalState; }
                 else { foundEmptyTransitionToFinalState = CheckEmptyTransitions(transitionsToCheck); }
@@ -313,7 +314,7 @@ namespace Formele_Methoden_app
             if(length < GetMinimumLanguageLength()) { return errorString; } //Early return for when the given length is shorter than the lenght of the shortest word
 
             Random rng = new Random();
-            T startState = startStates.ElementAt(rng.Next(0, (startStates.Count - 1))); //Substracting one to prevent out of bounds errors
+            T startState = StartStates.ElementAt(rng.Next(0, (StartStates.Count - 1))); //Substracting one to prevent out of bounds errors
             string result = AddLetterToLanguage(length, initialString, startState);
 
             result = String.IsNullOrEmpty(result) ? errorString : result;
@@ -336,7 +337,7 @@ namespace Formele_Methoden_app
             {
                 remainingLength = remainingLength - 1;
 
-                IEnumerable<Transition<T>> validTransitions = transitions.Where(x => x.FromState.Equals(state));
+                IEnumerable<Transition<T>> validTransitions = Transitions.Where(x => x.FromState.Equals(state));
 
                 foreach (Transition<T> transition in validTransitions)
                 {
@@ -350,7 +351,7 @@ namespace Formele_Methoden_app
             }
             else
             {
-                resultingString = finalStates.Contains(state) ? stringSoFar : string.Empty;
+                resultingString = FinalStates.Contains(state) ? stringSoFar : string.Empty;
             }
 
             return resultingString;
@@ -364,7 +365,7 @@ namespace Formele_Methoden_app
         {
             int length = 0;
 
-            foreach(T state in startStates)
+            foreach(T state in StartStates)
             {
                 int returnedValue = CountNextState(length, state);
 
@@ -385,13 +386,13 @@ namespace Formele_Methoden_app
         {
             int newCount = previousCount + 1;
 
-            if (finalStates.Contains(state))
+            if (FinalStates.Contains(state))
             {
                 return newCount;
             }
             else
             {
-                IEnumerable<Transition<T>> transitionsForThisState = transitions.Where(x => x.FromState.Equals(state) && !x.FromState.Equals(x.ToState));
+                IEnumerable<Transition<T>> transitionsForThisState = Transitions.Where(x => x.FromState.Equals(state) && !x.FromState.Equals(x.ToState));
 
                 if(transitionsForThisState.ToArray().Count() == 0) { return 0; }
 

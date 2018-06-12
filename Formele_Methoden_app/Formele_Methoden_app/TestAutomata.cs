@@ -4,7 +4,7 @@ namespace Formele_Methoden_app
 {
     public class TestAutomata
     {
-       static public Automata<String> getExampleSlide8Lesson2()
+        static public Automata<String> getExampleSlide8Lesson2()
         {
             char[] alphabet = { 'a', 'b' };
             Automata<String> automata = new Automata<string>(alphabet);
@@ -34,7 +34,7 @@ namespace Formele_Methoden_app
             return automata;
         }
 
-       static public Automata<String> getExampleSlide14Lesson2()
+        static public Automata<String> getExampleSlide14Lesson2()
         {
             char[] alphabet = { 'a', 'b' };
             Automata<String> automata = new Automata<String>(alphabet);
@@ -62,6 +62,27 @@ namespace Formele_Methoden_app
             // two final states:
             automata.DefineAsFinalState("C");
             automata.DefineAsFinalState("E");
+
+            return automata;
+        }
+
+        static public Automata<String> ndfaToDfaTest()
+        {
+            char[] alphabet = { 'a', 'b' };
+            Automata<String> automata = new Automata<String>(alphabet);
+
+            automata.AddTransition(new Transition<string>("A", "B", 'a'));
+            automata.AddTransition(new Transition<string>("A", "C", 'b'));
+            automata.AddTransition(new Transition<string>("B", "D", 'a'));
+            automata.AddTransition(new Transition<string>("C", "B", 'b'));
+            automata.AddTransition(new Transition<string>("C", "D"));
+            automata.AddTransition(new Transition<string>("D", "A", 'b'));
+            automata.AddTransition(new Transition<string>("D", "E", 'a'));
+            automata.AddTransition(new Transition<string>("E", "C"));
+            automata.AddTransition(new Transition<string>("E", "F", 'a'));
+
+            automata.DefineAsStartState("A");
+            automata.DefineAsFinalState("F");
 
             return automata;
         }
