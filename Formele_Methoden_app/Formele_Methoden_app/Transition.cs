@@ -58,6 +58,7 @@ namespace Formele_Methoden_app
             else if (ReferenceEquals(this, other))
             {
                 return Equals(((Transition<T>)other)) && Identifier == (((Transition<T>)other).Identifier);
+                //return true;
             }
             else return false;
         }
