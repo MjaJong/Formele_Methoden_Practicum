@@ -128,6 +128,11 @@ namespace Formele_Methoden_app
             foreach (string state in auto4DFA.FinalStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
 
+            ret.testLanguage();
+            Console.WriteLine("-----------------------------------------\n");
+
+            DiagramWriter writer = new DiagramWriter();
+            writer.WriteToGVFile(auto1, "test", "", true);
             Console.Read();
         }
     }
