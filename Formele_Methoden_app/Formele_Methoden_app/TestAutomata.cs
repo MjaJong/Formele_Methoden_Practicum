@@ -86,5 +86,63 @@ namespace Formele_Methoden_app
 
             return automata;
         }
+
+        static public Automata<String> dfaMutationTestL1()
+        {
+            char[] alphabet = { 'a', 'b' };
+            Automata<String> automata = new Automata<String>(alphabet);
+
+            automata.AddTransition(new Transition<string>("A", "B", 'b'));
+            automata.AddTransition(new Transition<string>("B", "C", 'a'));
+            automata.AddTransition(new Transition<string>("C", "D", 'b'));
+            automata.AddTransition(new Transition<string>("D", "E", 'a'));
+            automata.AddTransition(new Transition<string>("E", "F", 'a'));
+
+            automata.AddTransition(new Transition<string>("A", "G", 'a'));
+            automata.AddTransition(new Transition<string>("B", "G", 'b'));
+            automata.AddTransition(new Transition<string>("C", "G", 'a'));
+            automata.AddTransition(new Transition<string>("D", "G", 'b'));
+            automata.AddTransition(new Transition<string>("E", "G", 'b'));
+
+            //End point shenenigans so testing goes a bit smoother
+            automata.AddTransition(new Transition<string>("F", 'a'));
+            automata.AddTransition(new Transition<string>("F", 'b'));
+            automata.AddTransition(new Transition<string>("G", 'a'));
+            automata.AddTransition(new Transition<string>("G", 'b'));
+
+            automata.DefineAsStartState("A");
+            automata.DefineAsFinalState("F");
+
+            return automata;
+        }
+
+        static public Automata<String> dfaMutationTestL4()
+        {
+            char[] alphabet = { 'a', 'b' };
+            Automata<String> automata = new Automata<String>(alphabet);
+
+            automata.AddTransition(new Transition<string>("A", "B", 'a'));
+            automata.AddTransition(new Transition<string>("B", "D", 'b'));
+            automata.AddTransition(new Transition<string>("D", "E", 'b'));
+            automata.AddTransition(new Transition<string>("B", 'a'));
+            automata.AddTransition(new Transition<string>("D", "B", 'a'));
+
+            automata.AddTransition(new Transition<string>("A", "C", 'b'));
+            automata.AddTransition(new Transition<string>("C", "F", 'b'));
+            automata.AddTransition(new Transition<string>("F", "G", 'a'));
+            automata.AddTransition(new Transition<string>("C", "B", 'a'));
+            automata.AddTransition(new Transition<string>("F", "C", 'b'));
+
+            automata.AddTransition(new Transition<string>("E", 'a'));
+            automata.AddTransition(new Transition<string>("E", 'b'));
+            automata.AddTransition(new Transition<string>("G", 'a'));
+            automata.AddTransition(new Transition<string>("G", 'b'));
+
+            automata.DefineAsStartState("A");
+            automata.DefineAsFinalState("E");
+            automata.DefineAsFinalState("G");
+
+            return automata;
+        }
     }
 }

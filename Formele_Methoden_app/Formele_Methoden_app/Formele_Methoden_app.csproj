@@ -43,7 +43,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Automata.cs" />
+    <Compile Include="DfaMutation.cs" />
     <Compile Include="DiagramWriter.cs" />
+    <Compile Include="Minimizer.cs" />
     <Compile Include="NdfaToDfa.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

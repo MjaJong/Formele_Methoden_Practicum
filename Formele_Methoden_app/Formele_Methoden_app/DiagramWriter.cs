@@ -13,7 +13,7 @@ namespace Formele_Methoden_app
         {
             Dictionary<T, int> stateNumbers = new Dictionary<T, int>();
             int i = 1;
-            foreach (T state in automata.states)
+            foreach (T state in automata.States)
             {
                 stateNumbers.Add(state, i);
                 i++;
@@ -31,9 +31,9 @@ namespace Formele_Methoden_app
 
                 foreach (KeyValuePair<T, int> state in stateNumbers)
                 {
-                    if (automata.startStates.Contains(state.Key))
+                    if (automata.StartStates.Contains(state.Key))
                         writer.WriteLine($@"{state.Value} [label=""{state.Key.ToString()}"", shape=ellipse, style=filled, color=lightblue]");
-                    else if(automata.finalStates.Contains(state.Key))
+                    else if(automata.FinalStates.Contains(state.Key))
                         writer.WriteLine($@"{state.Value} [label=""{state.Key.ToString()}"", shape=ellipse, peripheries=2, style=filled, color=yellowgreen]");
                     else
                         writer.WriteLine($@"{state.Value} [label=""{state.Key.ToString()}"", shape=ellipse]");
@@ -42,10 +42,10 @@ namespace Formele_Methoden_app
                 writer.WriteLine("");
 
                 //transitions
-                foreach (T start in automata.startStates)
+                foreach (T start in automata.StartStates)
                     writer.WriteLine($@"NOTHING -> {stateNumbers.FirstOrDefault(x => x.Key.Equals(start)).Value}");
 
-                foreach (Transition<T> transition in automata.transitions)
+                foreach (Transition<T> transition in automata.Transitions)
                 {
                     int from = stateNumbers.FirstOrDefault(x => x.Key.Equals(transition.FromState)).Value;
                     int to = stateNumbers.FirstOrDefault(x => x.Key.Equals(transition.ToState)).Value;

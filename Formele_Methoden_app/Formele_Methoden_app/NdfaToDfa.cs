@@ -78,7 +78,7 @@ namespace Formele_Methoden_app
         /// </summary>
         private void GenerateDFA()
         {
-            dfa = new Automata<T>();
+            dfa = new Automata<T>(ndfa.Symbols);
             //Start building the DFA as normal, with the state names being the combined states to be reached in one string, with a - as delimiter.
                 //Starting with the start state, foreach symbol create two string builder objects, build up the string in the state + - format
                 //Create a transition with the symbol and the states.
@@ -92,14 +92,11 @@ namespace Formele_Methoden_app
             foreach(Transition<T> transition in dfaStart)
             {
                 dfa.AddTransition(transition);
-                statesToTraverse.Add(transition.ToState);
+                if (!transition.FromState.Equals(transition.ToState)) { statesToTraverse.Add(transition.ToState); }
             }
 
             //Sets all the transitions for the following states
             GenerateOtherTransitions(statesToTraverse);
-
-            ////Removed duplicates that have been generated, which happens
-            //RemoveDuplicatesFromDfa(); Keeping this in in case of fuckups down the line
 
             //After that, for all states check if it's a start state or end state.
             MarkStatesAsStartOrEnd();
@@ -142,9 +139,9 @@ namespace Formele_Methoden_app
                     {
                         //Append to the string
                         toState.Append(state.ToString() + '-');
-                        //And remove last - TODO debug this
-                        toState.Remove(toState.Length - 1, 1);
                     }
+                    //And remove last - TODO debug this
+                    toState.Remove(toState.Length - 1, 1);
                 }
                 
                 //Ho boy, do not pay much attention to this atrocity
@@ -162,7 +159,7 @@ namespace Formele_Methoden_app
         /// </summary>
         /// <param name="statesToLoopThrough">The states to loop through</param>
         /// <returns></returns>
-        private List<Transition<T>> GenerateOtherTransitions(HashSet<T> statesToLoopThrough)
+        private void GenerateOtherTransitions(HashSet<T> statesToLoopThrough)
         {
             List<Transition<T>> transitions = new List<Transition<T>>();
             HashSet<T> statesToTraverseNext = new HashSet<T>();
@@ -240,52 +237,8 @@ namespace Formele_Methoden_app
             //Quick filter all states that happen to be the exact same (for example, C-D-E might be in the to traverse and the already traversed as the same string)
             statesToTraverseNext = new HashSet<T>(statesToTraverseNext.Except(statesAlreadyTraversed));
 
-            if (statesToTraverseNext.Count <= 0) { return transitions; }
-            else
-            {
-                List<Transition<T>> deeperTransitions = GenerateOtherTransitions(statesToTraverseNext);
-                return transitions.Union(deeperTransitions).ToList();
-            }
-        }
-
-        /// <summary>
-        /// Removes all the duplicate states from the dfa, and the associated transitions
-        /// </summary>
-        private void RemoveDuplicatesFromDfa()
-        {
-            List<T> duplicateStates = new List<T>();
-            List<T> statesSeenInCheck = new List<T>();
-
-            foreach (T state in dfa.States)//Check every state left after the first check
-            {
-                bool stateIsDuplicate = false;
-                foreach (T stateSeen in statesSeenInCheck)//With all states that we have seen
-                {
-                    if (StatesAreEqual(state, stateSeen))
-                    {
-                        stateIsDuplicate = true;
-                        break;
-                    }
-                }
-
-                if (stateIsDuplicate) { duplicateStates.Add(state); }//If it is a dupe, add to the list to remove
-                else { statesSeenInCheck.Add(state); }//Otherwise, add it to the seen states, as it is the first of it's kind
-            }
-
-            foreach(T duplicateState in duplicateStates)
-            {
-                dfa.States.Remove(duplicateState);
-                dfa.Transitions.RemoveWhere(x => x.FromState.Equals(duplicateState));
-                List<Transition<T>> transitionsToRemove = new List<Transition<T>>();
-
-                //foreach(Transition<T> transition in dfa.Transitions)
-                //{
-                //    if (transition.FromState.Equals(duplicateState)) { transitionsToRemove.Add(transition); }
-                //}
-
-                ////Right comparing two transitions goes infinite due to Equals(((Transition<T>)other)) && Identifier == (((Transition<T>)other).Identifier);
-                //foreach (Transition<T> transitionToRemove in transitionsToRemove) { dfa.Transitions.Remove(transitionToRemove); }
-            }
+            //Since this method adds states anyway, only continue if we still need to traverse states.
+            if (statesToTraverseNext.Count > 0) { GenerateOtherTransitions(statesToTraverseNext); }
         }
 
         /// <summary>
@@ -312,6 +265,11 @@ namespace Formele_Methoden_app
                 splitStates2T.Add(stateT);
             }
 
+            if(splitStates2T.Count > splitStates1T.Count)
+            {
+                return false;
+            }
+
             IEnumerable<T> splitStatesLeft = splitStates1T.Except(splitStates2T);
 
             if(splitStatesLeft.Count() <= 0) { return true; }//The states are equal
@@ -325,6 +283,11 @@ namespace Formele_Methoden_app
         {
             foreach(T state in dfa.States)
             {
+                foreach(T startState in ndfa.StartStates)
+                {
+                    if(StatesAreEqual(startState, state)) { dfa.StartStates.Add(state); }
+                }
+
                 string[] splitStates = state.ToString().Split('-');
                 List<T> splitStatesT = new List<T>(); //List of all states contained in tis state
                 foreach (string stateAsString in splitStates)
@@ -335,13 +298,10 @@ namespace Formele_Methoden_app
 
                 foreach(T stateT in splitStatesT) //Do this for each state, should a composite have both the ndfa start state and end state
                 {
-                    bool isStartState = false;
                     bool isFinalState = false;
 
-                    isStartState = ndfa.StartStates.Contains(stateT);
                     isFinalState = ndfa.FinalStates.Contains(stateT);
 
-                    if (isStartState) { dfa.StartStates.Add(state); }
                     if (isFinalState) { dfa.FinalStates.Add(state); }
                 }
             }

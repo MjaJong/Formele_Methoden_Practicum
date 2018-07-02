@@ -128,11 +128,107 @@ namespace Formele_Methoden_app
             foreach (string state in auto4DFA.FinalStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
 
-            ret.testLanguage();
-            Console.WriteLine("-----------------------------------------\n");
+            //This needs a better test, due to these not being dfa's
+            Automata<string> auto5 = TestAutomata.dfaMutationTestL1();
+            Automata<string> auto6 = TestAutomata.dfaMutationTestL4();
 
-            DiagramWriter writer = new DiagramWriter();
-            writer.WriteToGVFile(auto1, "test", "", true);
+            Console.WriteLine("auto5 is dfa? " + auto5.IsDfa());
+            Console.WriteLine("-----------------------------------------");
+
+            auto5.PrintTransitions();
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in auto5.StartStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in auto5.FinalStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            //Different dfa here
+            Console.WriteLine("auto6 is dfa? " + auto6.IsDfa());
+            Console.WriteLine("-----------------------------------------");
+
+            auto6.PrintTransitions();
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in auto6.StartStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in auto6.FinalStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            //Not L1
+            DfaMutation<string> dfaMutator = new DfaMutation<string>();
+            Automata<string> notL1 = dfaMutator.NotDfa(auto5);
+
+            foreach (string state in notL1.StartStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in notL1.FinalStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            //Reverted L4
+            Automata<string> revertedL4 = dfaMutator.ReverseDfa(auto6);
+
+            Console.WriteLine("revertedL4 is dfa? " + revertedL4.IsDfa());
+            Console.WriteLine("-----------------------------------------");
+
+            revertedL4.PrintTransitions();
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in revertedL4.StartStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in revertedL4.FinalStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            //DiagramWriter writer = new DiagramWriter();
+            //writer.WriteToGVFile(auto1, "test", "C:/Users/menno/Documents/Formele methoden/Formele_Methoden_Practicum/Formele_Methoden_app", true);
+
+            //Well, rewrite the process to better reflect what you do by hand. 
+            Automata<string> L1AndL4 = dfaMutator.CombineAutomataAnd(auto5, auto6);
+
+            Console.WriteLine("L1AndL4 is dfa? " + L1AndL4.IsDfa());
+            Console.WriteLine("-----------------------------------------");
+
+            L1AndL4.PrintTransitions();
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in L1AndL4.StartStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in L1AndL4.FinalStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            Automata<string> L1OrL4 = dfaMutator.CombinaAutomataOr(auto5, auto6);
+
+            Console.WriteLine("L1OrL4 is dfa? " + L1OrL4.IsDfa());
+            Console.WriteLine("-----------------------------------------");
+
+            L1OrL4.PrintTransitions();
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in L1OrL4.StartStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in L1OrL4.FinalStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            Minimizer<string> minimizer = new Minimizer<string>();
+            Automata<string> L1AndL4Minimal = minimizer.MinimizeUsingBrzozowski(L1AndL4);
+
+            Console.WriteLine("L1AndL4Minimal is dfa? " + L1AndL4Minimal.IsDfa());
+            Console.WriteLine("-----------------------------------------");
+
+            L1AndL4Minimal.PrintTransitions();
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in L1AndL4Minimal.StartStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
+            foreach (string state in L1AndL4Minimal.FinalStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+
             Console.Read();
         }
     }

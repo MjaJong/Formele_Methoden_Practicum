@@ -49,7 +49,7 @@ namespace Formele_Methoden_app
         /// <param name="state">The state</param>
         public void DefineAsStartState(T state)
         {
-            States.Add(state);
+            if (!DfaContainsState(state)) { States.Add(state); }
             StartStates.Add(state);
         }
 
@@ -59,7 +59,7 @@ namespace Formele_Methoden_app
         /// <param name="state">The state</param>
         public void DefineAsFinalState(T state)
         {
-            States.Add(state);
+            if (!DfaContainsState(state)) { States.Add(state); }
             FinalStates.Add(state);
         }
 
@@ -82,11 +82,15 @@ namespace Formele_Methoden_app
         {
             bool dfa = true;
 
+            if(States.Count == 0) { dfa = false; }
+
             foreach (T from in States)
             {
-                foreach (char symbol in Symbols)
+                List<Transition<T>> transitionsWithSymbol = Transitions.Where(x => x.FromState.Equals(from)).ToList();
+                if(transitionsWithSymbol.Count != 2)
                 {
-                    dfa = dfa && GetToStates(from, symbol).Count == 1;
+                    dfa = false;
+                    break;
                 }
             }
 
@@ -410,6 +414,57 @@ namespace Formele_Methoden_app
 
                 return nextCount;
             }
+        }
+
+        /// <summary>
+        /// Comparer that checks if states are equal
+        /// </summary>
+        /// <param name="state1">The first state</param>
+        /// <param name="state2">The second state</param>
+        /// <returns>A boolean that is true if the states are equal</returns>
+        private bool StatesAreEqual(T state1, T state2)
+        {
+            string[] splitStates1 = state1.ToString().Split('-');
+            List<T> splitStates1T = new List<T>(); //List of all states contained in tis state
+            foreach (string stateAsString in splitStates1)
+            {
+                T stateT = (T)Convert.ChangeType(stateAsString, typeof(T));
+                splitStates1T.Add(stateT);
+            }
+
+            string[] splitStates2 = state2.ToString().Split('-');
+            List<T> splitStates2T = new List<T>(); //List of all states contained in tis state
+            foreach (string stateAsString in splitStates2)
+            {
+                T stateT = (T)Convert.ChangeType(stateAsString, typeof(T));
+                splitStates2T.Add(stateT);
+            }
+
+            IEnumerable<T> splitStatesLeft = splitStates1T.Except(splitStates2T);
+
+            if (splitStatesLeft.Count() <= 0) { return true; }//The states are equal
+            else { return false; }//States aren't equal
+        }
+
+        /// <summary>
+        /// Check to see if an dfa already contains a state.
+        /// </summary>
+        /// <param name="state">The state to search for.</param>
+        /// <returns>A boolean that is true if the state has been found</returns>
+        private bool DfaContainsState(T state)
+        {
+            bool dfaContainsState = false;
+
+            foreach (T dfaState in States)
+            {
+                if (StatesAreEqual(dfaState, state))
+                {
+                    dfaContainsState = true;
+                    break;
+                }
+            }
+
+            return dfaContainsState;
         }
     }
 }
