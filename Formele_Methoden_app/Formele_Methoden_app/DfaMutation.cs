@@ -198,7 +198,7 @@ namespace Formele_Methoden_app
         private void MapReachableStatesForGivenDFA(Automata<T> firstDfa, Automata<T> secondDfa)
         {
             Dictionary<T, List<KeyValuePair<char, T>>> transtionMap = new Dictionary<T, List<KeyValuePair<char, T>>>();
-            IEnumerable<char> combinedSymbols = firstDfa.Symbols.Intersect(secondDfa.Symbols); //As we need to share the letters to actually go somewhere
+            IEnumerable<char> combinedSymbols = firstDfa.Symbols.Intersect(secondDfa.Symbols);
 
             foreach (T firstState in firstDfa.States)
             {
@@ -213,7 +213,7 @@ namespace Formele_Methoden_app
 
                     foreach (char symbol in combinedSymbols)
                     {
-                        //Both of these should be one transition due to one dfa, so using first is not a problem (unless it defaults of course...)
+                        //Both of these should be one transition due to one dfa, so using first is not a problem
                         IEnumerable<Transition<T>> iFirstTransition = firstDfa.Transitions.Where(x => x.FromState.Equals(firstState) && x.Identifier == symbol);
                         IEnumerable<Transition<T>> iSecondTransition = secondDfa.Transitions.Where(x => x.FromState.Equals(secondState) && x.Identifier == symbol);
 
@@ -282,7 +282,7 @@ namespace Formele_Methoden_app
         private bool StatesAreEqual(T state1, T state2)
         {
             string[] splitStates1 = state1.ToString().Split('-');
-            List<T> splitStates1T = new List<T>(); //List of all states contained in tis state
+            List<T> splitStates1T = new List<T>(); //List of all states contained in this state
             foreach (string stateAsString in splitStates1)
             {
                 T stateT = (T)Convert.ChangeType(stateAsString, typeof(T));
@@ -290,7 +290,7 @@ namespace Formele_Methoden_app
             }
 
             string[] splitStates2 = state2.ToString().Split('-');
-            List<T> splitStates2T = new List<T>(); //List of all states contained in tis state
+            List<T> splitStates2T = new List<T>(); //List of all states contained in this state
             foreach (string stateAsString in splitStates2)
             {
                 T stateT = (T)Convert.ChangeType(stateAsString, typeof(T));

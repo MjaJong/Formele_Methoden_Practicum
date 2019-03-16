@@ -19,13 +19,13 @@ namespace Formele_Methoden_app
         }
 
         /// <summary>
-        /// Turns the given <see cref="Automata{T}"/> ndfa into it's dfa
+        /// Turns the given <see cref="Automata{T}"/> ndfa into it's dfa.
         /// </summary>
         /// <param name="ndfaToTransform">the <see cref="Automata{T}"/> representing the ndfa</param>
         /// <returns>The <see cref="Automata{T}"/> dfa that can be build from the given ndfa</returns>
         public Automata<T> TransformNdfaIntoDfa(Automata<T> ndfaToTransform)
         {
-            if (ndfaToTransform.IsDfa()) { Console.WriteLine("Given ndfa is actually a dfa."); return ndfaToTransform; }
+            if (ndfaToTransform.IsDfa()) { Console.WriteLine("Given NDFA is actually a DFA."); return ndfaToTransform; }
 
             ndfa = ndfaToTransform;
 
@@ -36,7 +36,7 @@ namespace Formele_Methoden_app
             GenerateDFA();
 
             //See if we actually have a DFA
-            if (!dfa.IsDfa()) { Console.WriteLine("Congrats, it isn't a DFA..."); return new Automata<T>(); }
+            if (!dfa.IsDfa()) { Console.WriteLine("Diagram isn't a DFA."); return new Automata<T>(); }
 
             return dfa;
         }
@@ -120,7 +120,7 @@ namespace Formele_Methoden_app
                 {
                     //Append to the string
                     fromState.Append(state.ToString() + '-');
-                    //And remove last - TODO debug this
+                    //And remove last
                     fromState.Remove(fromState.Length - 1, 1);
 
                     //Filter this states transitions by the symbol
@@ -140,11 +140,10 @@ namespace Formele_Methoden_app
                         //Append to the string
                         toState.Append(state.ToString() + '-');
                     }
-                    //And remove last - TODO debug this
+                    //And remove last
                     toState.Remove(toState.Length - 1, 1);
                 }
                 
-                //Ho boy, do not pay much attention to this atrocity
                 T fromStateT = (T)Convert.ChangeType(fromState.ToString(), typeof(T));
                 T toStateT = (T)Convert.ChangeType(toState.ToString(), typeof(T));
 
@@ -177,7 +176,7 @@ namespace Formele_Methoden_app
 
                 //For the state (which may be a composite) get all single states
                 string[] splitStates = currentStateLoopingThrough.ToString().Split('-');
-                List<T> splitStatesT = new List<T>(); //List of all states contained in tis state
+                List<T> splitStatesT = new List<T>(); //List of all states contained in this state
                 foreach (string stateAsString in splitStates)
                 {
                     T stateT = (T)Convert.ChangeType(stateAsString, typeof(T));
@@ -205,7 +204,7 @@ namespace Formele_Methoden_app
                             toState.Append(reachableState.ToString() + '-');
                         }
 
-                        //And remove last - TODO debug this
+                        //And remove last
                         toState.Remove(toState.Length - 1, 1);
                     }
 
@@ -289,7 +288,7 @@ namespace Formele_Methoden_app
                 }
 
                 string[] splitStates = state.ToString().Split('-');
-                List<T> splitStatesT = new List<T>(); //List of all states contained in tis state
+                List<T> splitStatesT = new List<T>(); //List of all states contained in this state
                 foreach (string stateAsString in splitStates)
                 {
                     T stateT = (T)Convert.ChangeType(stateAsString, typeof(T));

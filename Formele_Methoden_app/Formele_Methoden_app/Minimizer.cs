@@ -35,10 +35,10 @@ namespace Formele_Methoden_app
         }
 
         /// <summary>
-        /// A bloody lazy method to fix something i really don't have the patience to fix right now. This makes sure only a single - will end up between states.
+        /// This makes sure only a single - will end up between states.
         /// </summary>
         /// <param name="dfaToRemap">The dfa to remap the states for</param>
-        /// <returns></returns>
+        /// <returns>A re mapped version of the given automata</returns>
         private Automata<T> RemapStates(Automata<T> dfaToRemap)
         {
             Dictionary<T, T> stateMap = new Dictionary<T, T>();

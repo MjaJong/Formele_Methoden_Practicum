@@ -4,8 +4,9 @@ namespace Formele_Methoden_app
 {
     class Program
     {
+        #region constant test strings for automata
         private const string VALID_STRING_1 = "aba";
-        private const string INVALID_STRING_0 = "aaaba"; //Actually invalid, damned test
+        private const string INVALID_STRING_0 = "aaaba";
         private const string VALID_STRING_2 = "abababa";
         private const string INVALID_STRING_1 = "bba";
         private const string INVALID_STRING_2 = "aaa";
@@ -22,30 +23,85 @@ namespace Formele_Methoden_app
         private const string NDFA_TO_DFA_INVALID_1 = "bbb";
         private const string NDFA_TO_DFA_INVALID_2 = "bbaa";
         private const string NDFA_TO_DFA_INVALID_3 = "aabbbb";
+        #endregion
 
         static void Main(string[] args)
         {
-            Automata<String> auto1 = TestAutomata.getExampleSlide8Lesson2();
-            Automata<String> auto2 = TestAutomata.getExampleSlide14Lesson2();
+            bool exitLoop = false;
+            while (true)
+            {
+                Console.WriteLine("Commands are as follows:");
+                Console.WriteLine("TestClass for the test of the (N)DFA class.");
+                Console.WriteLine("Regex for the test of the RegExp and thompson construction.");
+                Console.WriteLine("NdfaToDfa for the test of the NDFA to DFA class.");
+                Console.WriteLine("Operations for the test of the dfa operations and minimalization.");
+                Console.WriteLine("And exit to stop the application.");
+                Console.WriteLine("Please input a command to show a test case:");
 
-            auto1.PrintTransitions();
-            Console.WriteLine("Auto1 is dfa? " + auto1.IsDfa());
-            Console.WriteLine("String {0} is a {1} string for Auto1.", VALID_STRING_1, auto1.IsStringAcceptable(VALID_STRING_1) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto1.", INVALID_STRING_0, auto1.IsStringAcceptable(INVALID_STRING_0) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto1.", VALID_STRING_2, auto1.IsStringAcceptable(VALID_STRING_2) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto1.", INVALID_STRING_1, auto1.IsStringAcceptable(INVALID_STRING_1) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto1.", INVALID_STRING_2, auto1.IsStringAcceptable(INVALID_STRING_2) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto1.", INVALID_STRING_3, auto1.IsStringAcceptable(INVALID_STRING_3) ? "valid" : "invalid");
-            Console.WriteLine("Generate a string of length 3. Resulting string = " + auto1.GenerateLanguageOfGivenLength(3));
+                string line = Console.ReadLine().ToLower();
+
+                switch (line)
+                {
+                    case "testclass":
+                        Console.Clear();
+                        TestNDFAClass();
+                        break;
+                    case "regex":
+                        Console.Clear();
+                        TestRegExAndThompson();
+                        break;
+                    case "ndfatodfa":
+                        Console.Clear();
+                        TestNdfaToDfa();
+                        break;
+                    case "operations":
+                        Console.Clear();
+                        TestMutationAndMinimalization();
+                        break;
+                    case "exit":
+                        exitLoop = true; ;
+                        break;
+                    default:
+                        Console.WriteLine("Invalid command given. \n");
+                        break;
+                }
+                if (exitLoop) { break; }
+            }
+        }
+
+        private static void TestNDFAClass()
+        {
+            Automata<String> NDFA1 = TestAutomata.getExampleSlide8Lesson2();
+            Automata<String> NDFA2 = TestAutomata.getExampleSlide14Lesson2();
+
+            NDFA1.PrintTransitions();
             Console.WriteLine("-----------------------------------------");
-            auto2.PrintTransitions();
-            Console.WriteLine("Auto2 is dfa? " + auto2.IsDfa());
+            Console.WriteLine("NDFA1 is dfa? " + NDFA1.IsDfa());
+            Console.WriteLine("-----------------------------------------");
+            foreach (string state in NDFA1.StartStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+            foreach (string state in NDFA1.FinalStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
+            Console.WriteLine("String {0} is a {1} string for Auto1.", VALID_STRING_1, NDFA1.IsStringAcceptable(VALID_STRING_1) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto1.", INVALID_STRING_0, NDFA1.IsStringAcceptable(INVALID_STRING_0) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto1.", VALID_STRING_2, NDFA1.IsStringAcceptable(VALID_STRING_2) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto1.", INVALID_STRING_1, NDFA1.IsStringAcceptable(INVALID_STRING_1) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto1.", INVALID_STRING_2, NDFA1.IsStringAcceptable(INVALID_STRING_2) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto1.", INVALID_STRING_3, NDFA1.IsStringAcceptable(INVALID_STRING_3) ? "valid" : "invalid");
+            Console.WriteLine("-----------------------------------------");
+            Console.WriteLine("Generate a string of length 9. Resulting string = " + NDFA1.GenerateLanguageOfGivenLength(9));
             Console.WriteLine("-----------------------------------------");
 
+            NDFA2.PrintTransitions();
+            Console.WriteLine("NDFA2 is dfa? " + NDFA2.IsDfa());
+            Console.WriteLine("-----------------------------------------");
+        }
+
+        private static void TestRegExAndThompson()
+        {
             RegExpTest ret = new RegExpTest();
-            //ret.testLanguage();
+            ret.testLanguage();
             ret.testToString();
-            Console.WriteLine("-----------------------------------------");
 
             RegExp regExp1 = new RegExp("baa");
             RegExp regExp2 = new RegExp("aba");
@@ -55,111 +111,116 @@ namespace Formele_Methoden_app
             RegExp orStar = oneOrTwo.Star();
             RegExp orStarDotThree = orStar.Dot(regExp3);
             RegExp orStarDotThreePlus = orStarDotThree.Plus();
+            Console.WriteLine("-----------------------------------------");
 
-            Console.WriteLine(orStarDotThreePlus.ToString());
+            Console.WriteLine("And conversion by use of the thompson construction:");
+            Console.WriteLine("-----------------------------------------");
 
             ThompsonConstruction thompson = new ThompsonConstruction();
-            Automata<string> auto3 = thompson.GenerateNDFA(orStarDotThreePlus);
+            Automata<string> thompsonNDFA = thompson.GenerateNDFA(orStarDotThreePlus);
 
-            Console.WriteLine(auto3.IsDfa());
+            Console.WriteLine("thompsonNDFA is dfa? " + thompsonNDFA.IsDfa());
             Console.WriteLine("-----------------------------------------");
 
-            auto3.PrintTransitions();
+            thompsonNDFA.PrintTransitions();
             Console.WriteLine("-----------------------------------------");
 
-            //Should all be valid
-            Console.WriteLine("String {0} is a {1} string for Auto3.", THOMPSON_TEST_1, auto3.IsStringAcceptable(THOMPSON_TEST_1) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto3.", THOMPSON_TEST_2, auto3.IsStringAcceptable(THOMPSON_TEST_2) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto3.", THOMPSON_TEST_3, auto3.IsStringAcceptable(THOMPSON_TEST_3) ? "valid" : "invalid");
+            foreach (string state in thompsonNDFA.StartStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
 
-            //At this point, somehow this regexp screws up. For now NDFA -> DFA is being implemented
-            ////Builds: a*(aa+|ba*b)*(abba|baab|bbbb)+
-            //RegExp secondTest1 = new RegExp("a");
-            //RegExp secondTest2 = new RegExp("b");
-            //RegExp secondTest3 = new RegExp("abba");
-            //RegExp secondTest4 = new RegExp("baab");
-            //RegExp secondTest5 = new RegExp("bbbb");
+            foreach (string state in thompsonNDFA.FinalStates) { Console.WriteLine(state); }
+            Console.WriteLine("-----------------------------------------");
 
-            //RegExp aStar = secondTest1.Star();
-            //RegExp aPlus = secondTest1.Plus();
-            //RegExp orFirstHalf = secondTest1.Dot(aPlus); //a.a+
-            //RegExp orSecondHalf = secondTest2.Dot(aStar.Dot(secondTest2));//b.a*.b
-            //RegExp firstOr = orFirstHalf.Or(orSecondHalf);//a.a+|b.a*.b
-            //RegExp firstOrStarred = firstOr.Star();//(a.a+|b.a*.b)*
-            //RegExp secondTestFirstHalf = aStar.Dot(firstOrStarred);//a*.(a.a+|b.a*.b)*
-            //RegExp secondOr = secondTest3.Or(secondTest4.Or(secondTest5));//abba|baab|bbbb
-            //RegExp secondTestSecondHalf = secondOr.Plus();//(abba|baab|bbbb)+
-            //RegExp secondTest = secondTestFirstHalf.Dot(secondTestSecondHalf);//(a*.(a.a+|b.a*.b)*).((abba|baab|bbbb)+)
+            Console.WriteLine("String {0} is a {1} string for Auto3.", THOMPSON_TEST_1, thompsonNDFA.IsStringAcceptable(THOMPSON_TEST_1) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto3.", THOMPSON_TEST_2, thompsonNDFA.IsStringAcceptable(THOMPSON_TEST_2) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for Auto3.", THOMPSON_TEST_3, thompsonNDFA.IsStringAcceptable(THOMPSON_TEST_3) ? "valid" : "invalid");
+            Console.WriteLine("-----------------------------------------");
+        }
 
+        private static void TestNdfaToDfa()
+        {
+            Automata<string> testNdfa = TestAutomata.ndfaToDfaTest();
+            Console.WriteLine("testNdfa is dfa? " + testNdfa.IsDfa());
+            Console.WriteLine("-----------------------------------------");
 
-            //Console.WriteLine(secondTest);
-            //Console.WriteLine("-----------------------------------------");
+            testNdfa.PrintTransitions();
+            Console.WriteLine("-----------------------------------------");
 
-            //Automata<string> auto4 = thompson.GenerateNDFA(secondTest);//This fails due to the final dot operator, which fucking sucks. Probably anyway. I have no idea of how to fix this.
-            //Console.WriteLine(auto4.IsDfa());
-            //Console.WriteLine("-----------------------------------------");
+            Console.WriteLine("StartStatesIn NDFA: ");
+            foreach(string startState in testNdfa.StartStates) { Console.WriteLine(startState); }
+            Console.WriteLine("-----------------------------------------");
 
-            //auto4.PrintTransitions();
-            //Console.WriteLine("-----------------------------------------");
+            Console.WriteLine("EndStates NDFA: ");
+            foreach (string endState in testNdfa.FinalStates) { Console.WriteLine(endState); }
+            Console.WriteLine("-----------------------------------------");
 
-            Automata<string> auto4 = TestAutomata.ndfaToDfaTest();
-            Console.WriteLine("auto4 is dfa? " + auto4.IsDfa());
-            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_VALID_1, auto4.IsStringAcceptable(NDFA_TO_DFA_VALID_1) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_VALID_2, auto4.IsStringAcceptable(NDFA_TO_DFA_VALID_2) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_VALID_3, auto4.IsStringAcceptable(NDFA_TO_DFA_VALID_3) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_VALID_4, auto4.IsStringAcceptable(NDFA_TO_DFA_VALID_4) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_INVALID_1, auto4.IsStringAcceptable(NDFA_TO_DFA_INVALID_1) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_INVALID_2, auto4.IsStringAcceptable(NDFA_TO_DFA_INVALID_2) ? "valid" : "invalid");
-            Console.WriteLine("String {0} is a {1} string for Auto4.", NDFA_TO_DFA_INVALID_3, auto4.IsStringAcceptable(NDFA_TO_DFA_INVALID_3) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfa.", NDFA_TO_DFA_VALID_1, testNdfa.IsStringAcceptable(NDFA_TO_DFA_VALID_1) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfa.", NDFA_TO_DFA_VALID_2, testNdfa.IsStringAcceptable(NDFA_TO_DFA_VALID_2) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfa.", NDFA_TO_DFA_VALID_3, testNdfa.IsStringAcceptable(NDFA_TO_DFA_VALID_3) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfa.", NDFA_TO_DFA_VALID_4, testNdfa.IsStringAcceptable(NDFA_TO_DFA_VALID_4) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfa.", NDFA_TO_DFA_INVALID_1, testNdfa.IsStringAcceptable(NDFA_TO_DFA_INVALID_1) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfa.", NDFA_TO_DFA_INVALID_2, testNdfa.IsStringAcceptable(NDFA_TO_DFA_INVALID_2) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfa.", NDFA_TO_DFA_INVALID_3, testNdfa.IsStringAcceptable(NDFA_TO_DFA_INVALID_3) ? "valid" : "invalid");
             Console.WriteLine("-----------------------------------------");
 
             NdfaToDfa<string> converter = new NdfaToDfa<string>();
-            Automata<string> auto4DFA = converter.TransformNdfaIntoDfa(auto4);
-            Console.WriteLine("auto4DFA is dfa? " + auto4DFA.IsDfa());
+            Automata<string> testNdfaDFA = converter.TransformNdfaIntoDfa(testNdfa);
+            Console.WriteLine("testNdfaDFA is dfa? " + testNdfaDFA.IsDfa());
             Console.WriteLine("-----------------------------------------");
 
-            auto4DFA.PrintTransitions();
+            testNdfaDFA.PrintTransitions();
             Console.WriteLine("-----------------------------------------");
 
-            foreach(string state in auto4DFA.StartStates) { Console.WriteLine(state); }
+            foreach (string state in testNdfaDFA.StartStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
 
-            foreach (string state in auto4DFA.FinalStates) { Console.WriteLine(state); }
+            foreach (string state in testNdfaDFA.FinalStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
 
-            //This needs a better test, due to these not being dfa's
-            Automata<string> auto5 = TestAutomata.dfaMutationTestL1();
-            Automata<string> auto6 = TestAutomata.dfaMutationTestL4();
+            Console.WriteLine("And the same strings as befor in the DFA:");
+            Console.WriteLine();
+            Console.WriteLine("String {0} is a {1} string for testNdfaDFA.", NDFA_TO_DFA_VALID_1, testNdfaDFA.IsStringAcceptable(NDFA_TO_DFA_VALID_1) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfaDFA.", NDFA_TO_DFA_VALID_2, testNdfaDFA.IsStringAcceptable(NDFA_TO_DFA_VALID_2) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfaDFA.", NDFA_TO_DFA_VALID_3, testNdfaDFA.IsStringAcceptable(NDFA_TO_DFA_VALID_3) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfaDFA.", NDFA_TO_DFA_VALID_4, testNdfaDFA.IsStringAcceptable(NDFA_TO_DFA_VALID_4) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfaDFA.", NDFA_TO_DFA_INVALID_1, testNdfaDFA.IsStringAcceptable(NDFA_TO_DFA_INVALID_1) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfaDFA.", NDFA_TO_DFA_INVALID_2, testNdfaDFA.IsStringAcceptable(NDFA_TO_DFA_INVALID_2) ? "valid" : "invalid");
+            Console.WriteLine("String {0} is a {1} string for testNdfaDFA.", NDFA_TO_DFA_INVALID_3, testNdfaDFA.IsStringAcceptable(NDFA_TO_DFA_INVALID_3) ? "valid" : "invalid");
+            Console.WriteLine("-----------------------------------------");
+        }
 
-            Console.WriteLine("auto5 is dfa? " + auto5.IsDfa());
+        private static void TestMutationAndMinimalization()
+        {
+            Automata<string> L1 = TestAutomata.dfaMutationTestL1();
+            Automata<string> L4 = TestAutomata.dfaMutationTestL4();
+
+            Console.WriteLine("L1 is dfa? " + L1.IsDfa());
             Console.WriteLine("-----------------------------------------");
 
-            auto5.PrintTransitions();
+            L1.PrintTransitions();
             Console.WriteLine("-----------------------------------------");
 
-            foreach (string state in auto5.StartStates) { Console.WriteLine(state); }
+            foreach (string state in L1.StartStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
 
-            foreach (string state in auto5.FinalStates) { Console.WriteLine(state); }
+            foreach (string state in L1.FinalStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
 
-            //Different dfa here
-            Console.WriteLine("auto6 is dfa? " + auto6.IsDfa());
+            Console.WriteLine("L4 is dfa? " + L4.IsDfa());
             Console.WriteLine("-----------------------------------------");
 
-            auto6.PrintTransitions();
+            L4.PrintTransitions();
             Console.WriteLine("-----------------------------------------");
 
-            foreach (string state in auto6.StartStates) { Console.WriteLine(state); }
+            foreach (string state in L4.StartStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
 
-            foreach (string state in auto6.FinalStates) { Console.WriteLine(state); }
+            foreach (string state in L4.FinalStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
 
             //Not L1
             DfaMutation<string> dfaMutator = new DfaMutation<string>();
-            Automata<string> notL1 = dfaMutator.NotDfa(auto5);
+            Automata<string> notL1 = dfaMutator.NotDfa(L1);
 
             foreach (string state in notL1.StartStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
@@ -168,7 +229,7 @@ namespace Formele_Methoden_app
             Console.WriteLine("-----------------------------------------");
 
             //Reverted L4
-            Automata<string> revertedL4 = dfaMutator.ReverseDfa(auto6);
+            Automata<string> revertedL4 = dfaMutator.ReverseDfa(L4);
 
             Console.WriteLine("revertedL4 is dfa? " + revertedL4.IsDfa());
             Console.WriteLine("-----------------------------------------");
@@ -182,11 +243,7 @@ namespace Formele_Methoden_app
             foreach (string state in revertedL4.FinalStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
 
-            //DiagramWriter writer = new DiagramWriter();
-            //writer.WriteToGVFile(auto1, "test", "C:/Users/menno/Documents/Formele methoden/Formele_Methoden_Practicum/Formele_Methoden_app", true);
-
-            //Well, rewrite the process to better reflect what you do by hand. 
-            Automata<string> L1AndL4 = dfaMutator.CombineAutomataAnd(auto5, auto6);
+            Automata<string> L1AndL4 = dfaMutator.CombineAutomataAnd(L1, L4);
 
             Console.WriteLine("L1AndL4 is dfa? " + L1AndL4.IsDfa());
             Console.WriteLine("-----------------------------------------");
@@ -200,7 +257,7 @@ namespace Formele_Methoden_app
             foreach (string state in L1AndL4.FinalStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
 
-            Automata<string> L1OrL4 = dfaMutator.CombinaAutomataOr(auto5, auto6);
+            Automata<string> L1OrL4 = dfaMutator.CombinaAutomataOr(L1, L4);
 
             Console.WriteLine("L1OrL4 is dfa? " + L1OrL4.IsDfa());
             Console.WriteLine("-----------------------------------------");
@@ -228,8 +285,6 @@ namespace Formele_Methoden_app
 
             foreach (string state in L1AndL4Minimal.FinalStates) { Console.WriteLine(state); }
             Console.WriteLine("-----------------------------------------");
-
-            Console.Read();
         }
     }
 }
